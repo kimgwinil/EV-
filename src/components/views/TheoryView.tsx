@@ -9,17 +9,29 @@ export function TheoryView({ session }: { session: Session }) {
 
   if (!data) return <div className="p-8 text-center text-slate-500">이론 자료가 준비 중입니다.</div>;
 
-  // Determine which component to highlight based on week
-  let highlight = undefined;
-  if (session.id.startsWith('w4')) highlight = 'bms';
-  else if (session.id.startsWith('w3')) highlight = 'battery';
-  else if (session.id.startsWith('w2')) highlight = 'msd';
-  else if (session.id.startsWith('w5')) highlight = 'motor';
-  else if (session.id.startsWith('w6')) highlight = 'inverter';
-  else if (session.id.startsWith('w7')) highlight = 'obc';
+  const weekNumber = Number(session.id.match(/^w(\d+)/)?.[1] || 1);
+  const highlightByWeek = [
+    'msd',
+    'msd',
+    'battery',
+    'bms',
+    'motor',
+    'inverter',
+    'obc',
+    'inverter',
+    'bms',
+    'motor',
+    'obc',
+    'obc',
+    'inverter',
+    'bms',
+    'bms',
+    'battery'
+  ];
+  const highlight = highlightByWeek[weekNumber - 1] || 'battery';
 
   return (
-    <div className="max-w-4xl mx-auto flex flex-col gap-4 animate-fade-in pb-4 w-full">
+    <div className="max-w-7xl mx-auto flex flex-col gap-4 animate-fade-in pb-4 w-full">
       <div className="bg-slate-900 p-4 rounded-lg border border-slate-800 flex flex-col gap-3">
         <h2 className="text-sm font-bold flex items-center gap-2 text-white uppercase tracking-widest">
           <Clock size={16} className="text-blue-500" /> 세션 개요 (120분)
@@ -38,6 +50,7 @@ export function TheoryView({ session }: { session: Session }) {
           {session.ncsUnit && (
              <div className="flex gap-4"><span className="text-slate-500 w-16 shrink-0 block">연계 NCS:</span> <span className="text-slate-300">{session.ncsUnit}</span></div>
           )}
+          <div className="flex gap-4"><span className="text-slate-500 w-16 shrink-0 block">운영 리듬:</span> <span className="text-slate-300">{session.rhythmLabel || '120분 표준 세션'} · 도입 10분 / 본 활동 90분 / 정리 20분</span></div>
         </div>
       </div>
 
@@ -123,6 +136,23 @@ export function TheoryView({ session }: { session: Session }) {
              </div>
          </div>
       </div>
+
+      {(data.educatorNotes || data.studentSlides) && (
+        <div className="grid md:grid-cols-2 gap-4">
+          {data.educatorNotes && (
+            <div className="bg-slate-900 p-4 rounded-lg border border-slate-800">
+              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-3"><FileText size={14}/> 강사용 설명 노트</h3>
+              <p className="text-xs text-slate-300 leading-relaxed">{data.educatorNotes}</p>
+            </div>
+          )}
+          {data.studentSlides && (
+            <div className="bg-slate-900 p-4 rounded-lg border border-slate-800">
+              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-3"><FileText size={14}/> 학습자용 슬라이드 개요</h3>
+              <pre className="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap font-sans">{data.studentSlides}</pre>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

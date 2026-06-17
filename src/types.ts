@@ -1,4 +1,4 @@
-export type SessionType = 'learning' | 'evaluation';
+export type SessionType = 'learning' | 'theory' | 'simulator' | 'practice' | 'evaluation';
 
 export interface Session {
   id: string;
@@ -8,6 +8,7 @@ export interface Session {
   duration: number; // minutes
   objectives: string[];
   ncsUnit?: string;
+  rhythmLabel?: string;
   
   // Specific data depending on session type
   theoryData?: TheoryData;

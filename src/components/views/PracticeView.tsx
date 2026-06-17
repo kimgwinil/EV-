@@ -32,6 +32,10 @@ export function PracticeView({ session }: { session: Session }) {
                     <span className="text-slate-500 w-16 shrink-0 block">선수 이수:</span>
                     <span className="bg-orange-950/50 text-orange-400 border border-orange-900/50 px-2 py-0.5 rounded font-mono text-[10px] tracking-wide">{data.prerequisites}</span>
                 </div>
+                <div className="flex gap-2 mt-2">
+                    <span className="text-slate-500 w-16 shrink-0 block">타임라인:</span>
+                    <span className="text-slate-300">개요 10분 / JSA·PPE 15분 / 장비준비 10분 / 절차수행 55분 / 측정기록 15분 / 평가·복구 15분</span>
+                </div>
              </div>
           </div>
           <div className="bg-slate-900 p-4 rounded-lg border border-slate-800">
@@ -108,6 +112,40 @@ export function PracticeView({ session }: { session: Session }) {
                        </div>
                    </label>
                ))}
+           </div>
+       </div>
+
+       <div className="bg-slate-900 rounded-lg border border-slate-800 overflow-hidden">
+           <div className="p-3 bg-slate-900 border-b border-slate-800">
+               <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wide">측정 기록표</h3>
+           </div>
+           <div className="overflow-x-auto">
+               <table className="w-full text-xs text-left border-collapse min-w-[720px]">
+                   <thead>
+                       <tr className="border-b border-slate-800 text-slate-500 bg-slate-950/50">
+                           <th className="py-2 px-3 font-medium">항목</th>
+                           <th className="py-2 px-3 font-medium">기준값</th>
+                           <th className="py-2 px-3 font-medium">단위</th>
+                           <th className="py-2 px-3 font-medium">허용오차</th>
+                           <th className="py-2 px-3 font-medium">실측값</th>
+                           <th className="py-2 px-3 font-medium">판정</th>
+                       </tr>
+                   </thead>
+                   <tbody className="divide-y divide-slate-800">
+                       {[
+                         ['고전압 잔류전압', '0~30', 'V DC', '제조사 기준 이하'],
+                         ['절연저항', '1 이상', 'MΩ', '차량 기준 우선'],
+                         ['12V 보조전원', '12.4~14.5', 'V', '상태별 기준 적용'],
+                         ['관련 센서 데이터', '정상범위', '스캐너값', 'Freeze Frame 비교']
+                       ].map((row, idx) => (
+                         <tr key={idx} className="hover:bg-slate-800/40">
+                           {row.map((cell, cellIdx) => <td key={cellIdx} className="py-2 px-3 text-slate-300">{cell}</td>)}
+                           <td className="py-2 px-3 text-slate-600">기록</td>
+                           <td className="py-2 px-3 text-slate-600">정상/이상</td>
+                         </tr>
+                       ))}
+                   </tbody>
+               </table>
            </div>
        </div>
 

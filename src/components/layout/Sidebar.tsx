@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { BookOpen, Monitor, ShieldAlert, FileMinus, Activity, Wrench, CheckCircle, ChevronDown, ChevronRight, GraduationCap, X } from 'lucide-react';
 import { Curriculum, Session, Week } from '../../types';
+import { t, translateSessionTitle, translateTheme, useLanguageStore } from '../../i18n';
 
 interface SidebarProps {
   curriculum: Curriculum;
@@ -9,17 +10,24 @@ interface SidebarProps {
 }
 
 const typeIcons = {
+  learning: <Activity size={12} />,
   theory: <BookOpen size={12} />,
   simulator: <Monitor size={12} />,
   practice: <Wrench size={12} />,
   evaluation: <CheckCircle size={12} />
 };
 
-const typeLabels = { theory: "이론", simulator: "시뮬레이터", practice: "실습", evaluation: "평가" };
-
 export function Sidebar({ curriculum, activeSessionId, onSelectSession }: SidebarProps) {
-  const [expandedWeeks, setExpandedWeeks] = useState<number[]>([1, 4]); // Expand some by default for demo
+  const [expandedWeeks, setExpandedWeeks] = useState<number[]>([1, 5]);
   const [isManualOpen, setIsManualOpen] = useState(false);
+  const language = useLanguageStore(state => state.language);
+  const typeLabels = {
+    learning: t(language, 'integrated'),
+    theory: t(language, 'theoryShort'),
+    simulator: t(language, 'simulatorShort'),
+    practice: t(language, 'practiceShort'),
+    evaluation: t(language, 'evaluationShort')
+  };
 
   const toggleWeek = (weekNum: number) => {
     setExpandedWeeks(prev => 
@@ -29,7 +37,7 @@ export function Sidebar({ curriculum, activeSessionId, onSelectSession }: Sideba
 
   return (
     <nav className="w-56 border-r border-slate-800 bg-slate-900/30 flex flex-col shrink-0 h-full overflow-hidden hide-scrollbar">
-      <div className="p-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest shrink-0 border-b border-slate-800/50 bg-slate-900/50">Curr Directory</div>
+      <div className="p-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest shrink-0 border-b border-slate-800/50 bg-slate-900/50">{t(language, 'currentDirectory')}</div>
       <div className="flex-1 overflow-y-auto space-y-1 p-2">
         {curriculum.weeks.map((week) => (
           <div key={week.weekNumber} className="mb-2">
@@ -39,7 +47,7 @@ export function Sidebar({ curriculum, activeSessionId, onSelectSession }: Sideba
             >
               <div className="flex flex-col gap-0.5">
                 <span className="text-[9px] font-bold text-blue-500 tracking-wider">WEEK {week.weekNumber}</span>
-                <span className="line-clamp-1 text-[11px] text-slate-300">{week.theme}</span>
+                <span className="line-clamp-1 text-[11px] text-slate-300">{translateTheme(week.theme, language)}</span>
               </div>
               {expandedWeeks.includes(week.weekNumber) ? <ChevronDown size={14} className="text-slate-500 shrink-0"/> : <ChevronRight size={14} className="text-slate-500 shrink-0"/>}
             </button>
@@ -60,7 +68,7 @@ export function Sidebar({ curriculum, activeSessionId, onSelectSession }: Sideba
                         {typeIcons[session.type]}
                      </div>
                      <div className="flex-1 overflow-hidden flex items-center justify-between">
-                       <span className="block truncate text-[10px] leading-tight flex-1">{session.title}</span>
+                       <span className="block truncate text-[10px] leading-tight flex-1">{translateSessionTitle(session.title, language)}</span>
                        <span className={`text-[8px] font-mono shrink-0 ml-2 px-1 py-0.5 rounded ${isActive ? 'bg-blue-900/50 text-blue-300' : 'bg-slate-800 text-slate-400'}`}>D{session.day} {isActive ? typeLabels[session.type] : ''}</span>
                      </div>
                    </button>
@@ -75,7 +83,7 @@ export function Sidebar({ curriculum, activeSessionId, onSelectSession }: Sideba
            onClick={() => setIsManualOpen(true)}
            className="w-full py-2 px-4 bg-amber-600/90 hover:bg-amber-500 text-amber-50 font-bold text-[10px] rounded uppercase tracking-widest shadow-sm transition-colors border border-amber-500 flex justify-center items-center gap-2"
         >
-           <ShieldAlert size={14}/> View Safety Manual
+           <ShieldAlert size={14}/> {t(language, 'viewSafetyManual')}
         </button>
       </div>
 

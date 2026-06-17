@@ -24,6 +24,13 @@ export interface VehicleTelemetryDB {
     bmsFault: 'none' | 'temp_warning' | 'cell_imbalance' | 'msd_disconnected';
     
     // Powertrain Parameters
+    vehicleSpeed: number;
+    throttle: number;
+    regenLevel: number;
+    driveMode: 'eco' | 'normal' | 'sport';
+    torqueNm: number;
+    powerKw: number;
+    efficiencyKwhPer100: number;
     motorRpm: number;
     motorTemp: number;
     inverterTemp: number;
@@ -32,6 +39,10 @@ export interface VehicleTelemetryDB {
     // Actions
     setPowerMode: (mode: 'OFF' | 'ACC' | 'READY') => void;
     setMsdConnected: (status: boolean) => void;
+    setVehicleSpeed: (speed: number) => void;
+    setThrottle: (throttle: number) => void;
+    setRegenLevel: (level: number) => void;
+    setDriveMode: (mode: 'eco' | 'normal' | 'sport') => void;
     setMotorRpm: (rpm: number) => void;
     setPackSoc: (soc: number) => void;
     setInverterTemp: (temp: number) => void;
@@ -64,6 +75,13 @@ export const useVehicleStore = create<VehicleTelemetryDB>((set, get) => ({
     isBalancing: false,
     bmsFault: 'none',
     
+    vehicleSpeed: 0,
+    throttle: 0,
+    regenLevel: 1,
+    driveMode: 'normal',
+    torqueNm: 0,
+    powerKw: 0,
+    efficiencyKwhPer100: 0,
     motorRpm: 0,
     motorTemp: 22,
     inverterTemp: 24,
@@ -73,8 +91,37 @@ export const useVehicleStore = create<VehicleTelemetryDB>((set, get) => ({
     setMsdConnected: (status) => set(state => ({ 
         msdConnected: status, 
         powerMode: status ? state.powerMode : 'OFF',
-        bmsFault: status ? 'none' : 'msd_disconnected' 
+        bmsFault: status ? 'none' : 'msd_disconnected',
+        vehicleSpeed: status ? state.vehicleSpeed : 0,
+        throttle: status ? state.throttle : 0,
+        motorRpm: status ? state.motorRpm : 0
     })),
+    setVehicleSpeed: (speed) => set(state => {
+        const safeSpeed = state.powerMode === 'READY' && state.msdConnected ? Math.max(0, Math.min(180, speed)) : 0;
+        const rpm = safeSpeed * 92;
+        const modeFactor = state.driveMode === 'sport' ? 1.22 : state.driveMode === 'eco' ? 0.82 : 1;
+        const torque = safeSpeed === 0 ? 0 : Math.max(20, Math.min(360, (safeSpeed * 2.4 + state.throttle * 2.2) * modeFactor));
+        const power = rpm * torque / 9550;
+        return {
+            vehicleSpeed: safeSpeed,
+            motorRpm: rpm,
+            torqueNm: torque,
+            powerKw: power,
+            sysCurrent: power > 0 ? (power * 1000) / Math.max(1, state.sysVoltage) : 0,
+            efficiencyKwhPer100: safeSpeed > 0 ? Math.max(9, Math.min(32, 11 + safeSpeed * 0.075 + state.throttle * 0.065 + (state.driveMode === 'sport' ? 3 : 0))) : 0
+        };
+    }),
+    setThrottle: (throttle) => set(state => {
+        const nextThrottle = Math.max(0, Math.min(100, throttle));
+        const speedBias = state.powerMode === 'READY' ? nextThrottle * (state.driveMode === 'sport' ? 1.6 : state.driveMode === 'eco' ? 1.05 : 1.3) : 0;
+        return {
+            throttle: nextThrottle,
+            vehicleSpeed: Math.max(0, Math.min(180, speedBias)),
+            motorRpm: Math.max(0, Math.min(180, speedBias)) * 92
+        };
+    }),
+    setRegenLevel: (level) => set({ regenLevel: Math.max(0, Math.min(3, level)) }),
+    setDriveMode: (mode) => set({ driveMode: mode }),
     setMotorRpm: (rpm) => set({ motorRpm: rpm }),
     setPackSoc: (soc) => set({ packSoc: soc }),
     setInverterTemp: (temp) => set({ inverterTemp: temp }),
@@ -149,19 +196,31 @@ export const useVehicleStore = create<VehicleTelemetryDB>((set, get) => ({
 
         // Motor physics simple simulation
         let nextRpm = state.motorRpm;
+        let nextSpeed = state.vehicleSpeed;
+        let nextTorque = state.torqueNm;
+        let nextPower = state.powerKw;
+        let nextEfficiency = state.efficiencyKwhPer100;
         let nextMotorTemp = state.motorTemp;
         let nextInvTemp = state.inverterTemp;
         let nextCurrent = state.sysCurrent;
 
         if (state.powerMode === 'READY') {
-            // Idle simulated noise
-            nextRpm = Math.max(0, nextRpm + (Math.random() * 10 - 5));
-            if (nextRpm < 50) nextRpm = 100 + Math.random() * 50; 
-            nextCurrent = 5 + Math.random() * 2;
-            nextMotorTemp = Math.min(80, nextMotorTemp + 0.1);
-            nextInvTemp = Math.min(65, nextInvTemp + 0.1);
+            const modeFactor = state.driveMode === 'sport' ? 1.18 : state.driveMode === 'eco' ? 0.78 : 1;
+            const targetSpeed = state.throttle * (state.driveMode === 'sport' ? 1.65 : state.driveMode === 'eco' ? 1.08 : 1.32);
+            nextSpeed = Math.max(0, Math.min(180, nextSpeed + (targetSpeed - nextSpeed) * 0.18 - state.regenLevel * (state.throttle < 5 ? 1.2 : 0)));
+            nextRpm = nextSpeed * 92 + (Math.random() * 25 - 12);
+            nextTorque = nextSpeed < 1 ? 0 : Math.max(0, Math.min(390, (state.throttle * 3.0 + nextSpeed * 0.75) * modeFactor));
+            nextPower = Math.max(0, nextRpm * nextTorque / 9550);
+            nextCurrent = nextPower > 0 ? (nextPower * 1000) / Math.max(1, sysVolt) : 3 + Math.random() * 2;
+            nextEfficiency = nextSpeed > 1 ? Math.max(8.5, Math.min(34, 10.5 + nextSpeed * 0.08 + state.throttle * 0.055 + (state.driveMode === 'sport' ? 3.2 : 0) - state.regenLevel * 0.8)) : 0;
+            nextMotorTemp = Math.min(115, nextMotorTemp + nextPower * 0.006 - 0.15);
+            nextInvTemp = Math.min(105, nextInvTemp + nextPower * 0.005 - 0.12);
         } else {
             nextRpm = Math.max(0, nextRpm - 50);
+            nextSpeed = Math.max(0, nextSpeed - 3);
+            nextTorque = 0;
+            nextPower = 0;
+            nextEfficiency = 0;
             nextCurrent = state.obcActive ? -15 : 0.1;
             nextMotorTemp = Math.max(22, nextMotorTemp - 0.5);
             nextInvTemp = Math.max(24, nextInvTemp - 0.5);
@@ -180,7 +239,11 @@ export const useVehicleStore = create<VehicleTelemetryDB>((set, get) => ({
             sysVoltage: sysVolt,
             packSoc: avgSoc / newCells.length,
             packTemp: maxT,
+            vehicleSpeed: nextSpeed,
             motorRpm: nextRpm,
+            torqueNm: nextTorque,
+            powerKw: nextPower,
+            efficiencyKwhPer100: nextEfficiency,
             motorTemp: nextMotorTemp,
             inverterTemp: nextInvTemp,
             sysCurrent: nextCurrent,

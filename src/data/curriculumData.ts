@@ -1,92 +1,409 @@
-import { Curriculum } from '../types';
+import { Curriculum, EvaluationData, PracticeData, Session, TheoryData } from '../types';
+
+type WeekPlan = {
+  theme: string;
+  ncs: string;
+  simulatorId: string;
+  theoryFocus: string[];
+  simulatorFocus: string;
+  practiceTopic: string;
+  equipment: string[];
+  faults: string[];
+  misconceptions: { wrong: string; correction: string }[];
+};
+
+const weekPlans: WeekPlan[] = [
+  {
+    theme: 'EV 개론 + 고전압 안전 ①',
+    ncs: '전기자동차 정비 안전관리 / 고전압 시스템 기초',
+    simulatorId: 'safety_procedure',
+    theoryFocus: ['EV 파워트레인 구성', '고전압 위험과 인체 영향', 'PPE와 작업구역 통제', '서비스 플러그와 인터록 구조'],
+    simulatorFocus: 'PPE 착용, 전원 OFF, 12V 차단, MSD 탈거 순서를 반복 수행한다.',
+    practiceTopic: '고전압 작업 전 안전점검과 작업구역 통제',
+    equipment: ['절연장갑', '절연화', '절연매트', '안전콘', 'LOTO 태그', 'CAT III 멀티미터'],
+    faults: ['PPE 미착용 상태에서 MSD 접근', '전원 OFF 확인 누락'],
+    misconceptions: [
+      { wrong: '절연장갑만 착용하면 고전압 작업은 안전하다.', correction: '장갑은 최후 방어선이며 전원 차단, 검전, 작업구역 통제가 먼저다.' },
+      { wrong: 'EV는 시동음이 없으면 전기가 흐르지 않는다.', correction: 'READY, ACC, 충전 대기 상태에서도 고전압 릴레이가 투입될 수 있다.' }
+    ]
+  },
+  {
+    theme: '고전압 안전 ②: 차단·검전·절연측정',
+    ncs: '전기자동차 고전압 안전작업 / 절연저항 측정',
+    simulatorId: 'safety_procedure',
+    theoryFocus: ['LOTO 절차', '평활 커패시터 잔류전압', '검전기와 멀티미터 확인법', '절연저항 측정 원리'],
+    simulatorFocus: '차단 후 대기시간과 검전 위치를 선택하고, 잘못된 순서의 위험을 확인한다.',
+    practiceTopic: '차단/검전/절연측정 실물 절차',
+    equipment: ['CAT III 1000V 멀티미터', '절연저항계', '절연공구', '실습용 EV 모형', 'LOTO 키트'],
+    faults: ['잔류전압 대기시간 미준수', '멀티미터 자체 점검 누락'],
+    misconceptions: [
+      { wrong: '12V 배터리만 빼면 고전압은 자동으로 안전해진다.', correction: '12V 차단은 릴레이 오작동 방지이며, MSD 탈거와 0V 검전이 별도로 필요하다.' },
+      { wrong: '절연저항은 일반 저항 측정 모드로 확인할 수 있다.', correction: '절연저항은 지정 시험전압을 인가하는 메거로 측정해야 한다.' }
+    ]
+  },
+  {
+    theme: '고전압 배터리: 셀·모듈·팩, 열폭주, 열관리',
+    ncs: '전기자동차 배터리 시스템 점검',
+    simulatorId: 'bms_simulator',
+    theoryFocus: ['리튬이온 셀 원리', '직렬·병렬 연결과 팩 전압', '열폭주 메커니즘', '배터리 냉각 구조'],
+    simulatorFocus: 'SOC와 온도 변화가 셀 전압, 팩 전압, 열 위험에 미치는 영향을 관찰한다.',
+    practiceTopic: '배터리 외관·온도·커넥터 점검',
+    equipment: ['진단스캐너', '열화상 카메라', '절연저항계', '배터리 모형', '냉각수 누설 점검 키트'],
+    faults: ['특정 모듈 핫스팟', '배터리 냉각수 누설 의심'],
+    misconceptions: [
+      { wrong: '전압만 정상이면 배터리 팩은 정상이다.', correction: '전압, 온도, 셀 편차, 절연, 냉각 상태를 함께 봐야 한다.' },
+      { wrong: '열폭주는 외부 화염이 있어야 시작된다.', correction: '내부 단락, 과충전, 충격, 냉각 불량만으로도 시작될 수 있다.' }
+    ]
+  },
+  {
+    theme: 'BMS: SOC/SOH, 셀 밸런싱, 보호로직',
+    ncs: 'BMS 데이터 분석 및 배터리 진단',
+    simulatorId: 'bms_simulator',
+    theoryFocus: ['SOC 추정', 'SOH와 내부저항', '수동·능동 셀 밸런싱', '과전압·저전압·과온 보호'],
+    simulatorFocus: '셀 편차와 고온 시나리오에서 밸런싱과 보호로직 개입 조건을 판정한다.',
+    practiceTopic: '진단스캐너 기반 BMS 데이터 판독',
+    equipment: ['진단스캐너', '절연저항계', '오실로스코프', '실습용 BMS 보드'],
+    faults: ['셀 전압 편차 과다', '온도센서 이상으로 충전 제한'],
+    misconceptions: [
+      { wrong: 'SOC 100%는 셀의 화학적 완전 충전 상태다.', correction: '제조사는 수명 보호를 위해 상하단 버퍼를 둔다.' },
+      { wrong: '밸런싱은 낮은 셀을 강제로 충전하는 기능이다.', correction: '수동 밸런싱은 높은 셀의 에너지를 저항열로 소모해 편차를 줄인다.' }
+    ]
+  },
+  {
+    theme: '구동 모터: PMSM·유도전동기와 토크제어',
+    ncs: '전기자동차 구동모터 점검',
+    simulatorId: 'interactive_powertrain',
+    theoryFocus: ['회전자계와 3상 교류', 'PMSM과 유도전동기 차이', '리졸버 위치검출', '토크·RPM·전류 관계'],
+    simulatorFocus: 'READY 상태에서 RPM과 부하를 조작해 모터 온도와 전류 변화를 확인한다.',
+    practiceTopic: '모터 권선저항, 절연, 리졸버 신호 점검',
+    equipment: ['절연저항계', '밀리옴미터', '오실로스코프', '진단스캐너'],
+    faults: ['권선 절연저하', '리졸버 신호 드롭아웃'],
+    misconceptions: [
+      { wrong: '전기모터는 마모가 없어 고장나지 않는다.', correction: '베어링, 절연, 냉각, 센서 계통 고장이 발생한다.' },
+      { wrong: '모터 토크는 RPM이 높을수록 항상 커진다.', correction: '저속 정토크 영역과 고속 정출력 영역이 구분된다.' }
+    ]
+  },
+  {
+    theme: '전력변환: 인버터, DC-DC, OBC',
+    ncs: '전력변환장치 점검 및 파형 분석',
+    simulatorId: 'interactive_powertrain',
+    theoryFocus: ['DC-AC 변환', 'PWM과 스위칭 소자', 'LDC 12V 전원공급', 'OBC 완속충전 변환'],
+    simulatorFocus: '전압, 온도, 전원 모드 변화에 따른 인버터 출력 제한과 LDC 동작을 해석한다.',
+    practiceTopic: '인버터 잔류전압, LDC 출력, OBC 입력 상태 점검',
+    equipment: ['CAT III 멀티미터', '오실로스코프', '전류 클램프', '진단스캐너'],
+    faults: ['인버터 과온 출력제한', 'LDC 출력 저하로 12V 경고'],
+    misconceptions: [
+      { wrong: '인버터는 단순 변환기라 진단 포인트가 적다.', correction: '전력소자, 게이트구동, 냉각, 커패시터, 통신 상태를 함께 본다.' },
+      { wrong: '고전압 배터리가 충분하면 12V 문제는 생기지 않는다.', correction: 'LDC 또는 12V 배터리 문제가 있으면 차량 기동 자체가 제한된다.' }
+    ]
+  },
+  {
+    theme: '충전 시스템: AC/DC 충전, 표준, 충전 시퀀스',
+    ncs: '전기자동차 충전시스템 점검',
+    simulatorId: 'interactive_powertrain',
+    theoryFocus: ['완속과 급속 충전 차이', 'CP/PP 신호', '충전 릴레이와 인터록', 'CC-CV 충전제어'],
+    simulatorFocus: '충전 연결, 인증, 절연 확인, 전류 상승, 충전 종료 순서를 단계별로 수행한다.',
+    practiceTopic: '충전 인렛, CP/PP, 충전 제한 원인 점검',
+    equipment: ['충전 인렛 테스터', '진단스캐너', '멀티미터', '절연장갑', '실습용 충전기'],
+    faults: ['CP 신호 불량으로 충전 불가', '인렛 온도센서 과열 감지'],
+    misconceptions: [
+      { wrong: '급속충전기는 차량 배터리에 무조건 최대전류를 넣는다.', correction: 'BMS가 허용전류를 계산하고 충전기가 그 요청값을 따른다.' },
+      { wrong: '충전 커넥터만 꽂히면 고전압이 바로 흐른다.', correction: '통신, 접지, 인터록, 절연 확인 후 릴레이가 닫힌다.' }
+    ]
+  },
+  {
+    theme: '열관리·공조: 히트펌프와 통합 열관리',
+    ncs: '전기자동차 열관리시스템 점검',
+    simulatorId: 'interactive_powertrain',
+    theoryFocus: ['배터리 냉각 회로', '전동식 컴프레서', 'PTC와 히트펌프', '밸브·펌프 제어'],
+    simulatorFocus: '외기온, 배터리 온도, 인버터 온도 조건에 따른 냉각·난방 제어를 비교한다.',
+    practiceTopic: '냉각수 회로, 전동컴프레서 절연, 밸브 작동 점검',
+    equipment: ['냉각수 리필 장비', '공조 매니폴드 게이지', '절연저항계', '진단스캐너'],
+    faults: ['전동 워터펌프 작동 불량', '전동컴프레서 절연 저하'],
+    misconceptions: [
+      { wrong: 'EV 공조는 주행장치와 무관하다.', correction: '배터리와 인버터 열관리가 출력, 충전속도, 수명에 직접 영향을 준다.' },
+      { wrong: '일반 PAG 오일을 전동컴프레서에 써도 된다.', correction: '절연 저하를 막기 위해 전기차 전용 절연 오일을 사용해야 한다.' }
+    ]
+  },
+  {
+    theme: '차량 네트워크: CAN, VCU, DTC 해석',
+    ncs: '전기자동차 네트워크 진단',
+    simulatorId: 'interactive_powertrain',
+    theoryFocus: ['CAN High/Low 신호', 'VCU 제어 구조', 'DTC Freeze Frame', '통신 단절 진단'],
+    simulatorFocus: '가상 DTC와 실시간 데이터를 비교해 물리 고장과 통신 고장을 구분한다.',
+    practiceTopic: 'CAN 파형 측정과 DTC 원인 추적',
+    equipment: ['진단스캐너', '오실로스코프', '브레이크아웃 박스', '회로도'],
+    faults: ['CAN Low 단선', 'VCU-BMS 통신 지연'],
+    misconceptions: [
+      { wrong: 'DTC 삭제는 수리 완료와 같다.', correction: '삭제는 증상 제거가 아니라 기록 초기화이며 원인 검증이 필요하다.' },
+      { wrong: 'CAN 전압이 대략 보이면 통신은 정상이다.', correction: '차동 파형, 종단저항, 노이즈, 메시지 누락을 함께 확인한다.' }
+    ]
+  },
+  {
+    theme: '회생제동·진단 실무',
+    ncs: '전기자동차 회생제동 및 진단장비 활용',
+    simulatorId: 'interactive_powertrain',
+    theoryFocus: ['발전모드 토크', '마찰제동 협조제어', 'SOC·온도별 회생제한', '스캐너 진단 워크플로'],
+    simulatorFocus: 'SOC와 온도 조건에 따라 회생제동 가능량이 줄어드는 이유를 확인한다.',
+    practiceTopic: '스캐너 기반 회생토크, 브레이크 압력, 제한 조건 점검',
+    equipment: ['진단스캐너', '브레이크 오일 교환기', '리프트', '절연장갑'],
+    faults: ['고SOC 상태 회생제동 제한', '브레이크 압력센서 불일치'],
+    misconceptions: [
+      { wrong: '원페달 주행에서는 마찰 브레이크가 쓰이지 않는다.', correction: '정차 직전, 저마찰 노면, 긴급제동에는 마찰 브레이크가 개입한다.' },
+      { wrong: '회생제동이 약하면 모터 고장이다.', correction: 'SOC, 배터리 온도, 노면 안정성, 제동 시스템 조건을 먼저 확인한다.' }
+    ]
+  },
+  {
+    theme: '연계기술: V2G/V2L, 배터리 재사용, 충전인프라',
+    ncs: '전기자동차 연계기술 운용 및 사례 분석',
+    simulatorId: 'interactive_powertrain',
+    theoryFocus: ['양방향 전력변환', 'V2L 보호로직', '사용후 배터리 SOH 선별', '충전인프라 부하관리'],
+    simulatorFocus: '방전 한계, 부하 크기, SOC 조건을 바꿔 V2L 운용 가능 시간을 예측한다.',
+    practiceTopic: 'V2L 부하 연결과 사용후 배터리 사례 분석',
+    equipment: ['V2L 어댑터', 'AC 부하 테스터', '전력계', '진단스캐너'],
+    faults: ['부하 과다로 V2L 차단', 'SOH 낮은 모듈의 재사용 부적합'],
+    misconceptions: [
+      { wrong: 'V2L은 배터리 수명을 급격히 줄인다.', correction: 'BMS 방전 하한과 부하 제한 내에서는 일반 주행 방전과 유사하게 관리된다.' },
+      { wrong: '사용후 배터리는 팩 단위로만 재사용한다.', correction: '모듈별 SOH와 안전검사 후 ESS 등 용도에 맞게 선별한다.' }
+    ]
+  },
+  {
+    theme: '복합 진단 ①: 충전불가·주행불가 사례',
+    ncs: '전기자동차 복합 고장진단',
+    simulatorId: 'interactive_powertrain',
+    theoryFocus: ['고객 문진', '증상 재현', 'DTC 우선순위', '안전 차단 후 계통별 분리진단'],
+    simulatorFocus: '충전불가와 READY 불가 사례에서 진단 순서와 근거를 선택한다.',
+    practiceTopic: '복합 DTC 기반 원인 후보 좁히기',
+    equipment: ['진단스캐너', '멀티미터', '회로도', '작업지시서 템플릿'],
+    faults: ['충전 인렛 인터록 불량', '12V 저전압으로 READY 불가'],
+    misconceptions: [
+      { wrong: '가장 먼저 보이는 DTC가 항상 원인이다.', correction: '전원, 통신, 안전 차단 조건을 기준으로 원인 DTC와 결과 DTC를 구분한다.' },
+      { wrong: '복합 고장은 부품 교환으로 빠르게 해결한다.', correction: '측정 근거 없이 교환하면 비용과 2차 고장이 커진다.' }
+    ]
+  },
+  {
+    theme: '복합 진단 ②: 절연경고·출력제한 사례',
+    ncs: '전기자동차 고전압 고장진단',
+    simulatorId: 'safety_procedure',
+    theoryFocus: ['절연경고 발생 조건', '누설전류 경로', '출력제한 로직', '고장 재현과 안전 확보'],
+    simulatorFocus: '절연경고가 있는 차량에서 실물 접촉 전 차단·검전 절차를 완성한다.',
+    practiceTopic: '절연저항 측정과 출력제한 원인 분석',
+    equipment: ['절연저항계', '진단스캐너', '절연공구', '열화상 카메라'],
+    faults: ['냉각수 유입에 의한 절연저하', '인버터 과온 출력제한'],
+    misconceptions: [
+      { wrong: '절연경고가 떠도 주행 가능하면 작업해도 된다.', correction: '절연경고는 감전·화재 리스크이므로 작업 전 차단과 검전이 필수다.' },
+      { wrong: '출력제한은 배터리 문제만 의미한다.', correction: '배터리, 인버터, 모터, 열관리, 통신 조건 모두 원인이 될 수 있다.' }
+    ]
+  },
+  {
+    theme: '현장 서비스 운영: 정비문서, 고객응대, 품질관리',
+    ncs: '전기자동차 정비품질관리 및 고객응대',
+    simulatorId: 'interactive_powertrain',
+    theoryFocus: ['작업지시서 작성', '측정값 증거화', '고객 설명 구조', '재작업 방지 체크'],
+    simulatorFocus: '진단 결과 요약서를 작성하고 고객에게 안전·비용·재점검 기준을 설명한다.',
+    practiceTopic: '정비 리포트와 고객 설명 브리핑',
+    equipment: ['작업지시서', '진단 리포트 템플릿', '사진 기록 장비', '스캐너 출력물'],
+    faults: ['측정값 누락으로 보증판정 불가', '안전 설명 누락으로 고객 불신'],
+    misconceptions: [
+      { wrong: '정비 실력만 있으면 문서는 형식이다.', correction: 'EV 정비는 안전과 보증 판단 때문에 측정 근거 기록이 핵심 품질이다.' },
+      { wrong: '고객에게 기술 내용을 자세히 말할수록 좋다.', correction: '위험, 원인, 조치, 재발 방지 중심으로 이해 가능한 언어로 설명해야 한다.' }
+    ]
+  },
+  {
+    theme: '통합 고장진단 프로젝트 준비',
+    ncs: '전기자동차 통합 진단 프로젝트 수행',
+    simulatorId: 'interactive_powertrain',
+    theoryFocus: ['프로젝트 문제정의', '진단 가설 수립', '역할 분담', '발표 자료 구성'],
+    simulatorFocus: '제시된 복합 고장 로그에서 팀별 진단 계획과 측정 순서를 설계한다.',
+    practiceTopic: '캡스톤 진단 계획서 작성과 예비 발표',
+    equipment: ['진단스캐너', '회로도', '프로젝트 보드', '평가 루브릭'],
+    faults: ['충전불가와 절연경고 동시 발생', '출력제한과 냉각성능 저하 동시 발생'],
+    misconceptions: [
+      { wrong: '캡스톤은 정답 부품을 맞히는 시험이다.', correction: '안전, 진단 근거, 절차, 팀 커뮤니케이션, 설명 능력을 함께 평가한다.' },
+      { wrong: '가설은 하나만 세우고 검증하면 된다.', correction: '가능 원인을 우선순위화하고 측정으로 하나씩 배제해야 한다.' }
+    ]
+  },
+  {
+    theme: '최종 캡스톤: 종합 진단·발표·최종평가',
+    ncs: '전기자동차 정비 종합 수행평가',
+    simulatorId: 'interactive_powertrain',
+    theoryFocus: ['안전 브리핑', '복합 고장진단', '수리방안 제안', '최종 발표와 피드백'],
+    simulatorFocus: '최종 고장 시나리오를 수행하고 교수자 확인용 요약을 제출한다.',
+    practiceTopic: '캡스톤 종합 진단과 발표',
+    equipment: ['EV 진단 세트', 'PPE 풀세트', '실습용 EV/모형', '발표자료 템플릿'],
+    faults: ['READY 불가 + BMS 셀 편차', '충전 중단 + 인렛 온도 경고'],
+    misconceptions: [
+      { wrong: '최종평가는 빠르게 수리하는 사람이 유리하다.', correction: '고전압 안전과 근거 있는 진단을 지킨 결과가 가장 중요하다.' },
+      { wrong: '발표는 결과만 말하면 된다.', correction: '증상, 안전조치, 측정값, 판단근거, 재발방지까지 설명해야 한다.' }
+    ]
+  }
+];
+
+const buildTheory = (week: WeekPlan, day: number): TheoryData => {
+  const emphasis = day === 1 ? '원리와 구조' : '고장 메커니즘과 진단';
+  const principleDetail = `${week.theoryFocus[0]}는 단순 명칭 암기가 아니라 에너지 변환 경로를 따라 이해해야 합니다. 전기 에너지가 배터리 팩에서 고전압 배선, 릴레이, 인버터 또는 충전 계통으로 이동할 때 전압, 전류, 온도, 통신 허가 조건이 동시에 만족되어야 합니다. 강의에서는 정상 운전, 충전, 고장 보호 상태를 나누어 어떤 제어기가 최종 허가권을 갖는지 추적합니다.`;
+  const structureDetail = `${week.theoryFocus[1]}는 실제 정비 현장에서 부품 위치, 커넥터 잠금 구조, 냉각 라인, 차폐 케이블, 접지 포인트를 함께 봐야 합니다. 같은 증상이라도 전원 공급, 센서 입력, 통신, 냉각 불량 중 어느 계통이 원인인지 분리하기 위해 구성품 간 연결 관계를 블록도와 작업 동선 기준으로 정리합니다.`;
+  const controlDetail = `${week.theoryFocus[2]}와 관련된 제어는 VCU, BMS, 인버터, OBC/LDC, 열관리 제어기가 데이터를 주고받으며 결정합니다. 예를 들어 요청 토크가 들어와도 SOC가 낮거나 온도가 높거나 절연 경고가 있으면 출력 제한이 걸립니다. 이 세션에서는 스캐너 데이터 항목을 원인 데이터와 결과 데이터로 구분하고, 어떤 값이 먼저 변해야 정상 로직인지 판단합니다.`;
+  const faultDetail = `${week.faults[0]}가 발생하면 증상은 경고등 하나로만 나타나지 않습니다. DTC, Freeze Frame, 실시간 데이터, 물리 측정값이 서로 다른 시간차로 나타날 수 있습니다. 학습자는 단선, 단락, 접촉저항 증가, 절연저하, 과온, 통신 지연 중 어느 패턴인지 분류하고, 재현 가능한 조건과 재현하면 안 되는 위험 조건을 구분합니다.`;
+  const diagnosisDetail = `${week.faults[1]} 진단은 "부품 추정"이 아니라 증거 수집 순서입니다. 고객 문진으로 발생 조건을 좁히고, 안전 차단 가능 여부를 판단한 뒤, 회로도 기준 측정 위치를 정합니다. 이후 기준값, 허용오차, 실측값, 판정, 다음 조치를 표로 남겨 재검증과 고객 설명까지 이어지게 합니다.`;
+  const safetyDetail = `${emphasis} 단계에서도 고전압 시스템은 항상 에너지 잔류 가능성을 전제로 다룹니다. READY 표시, 충전 커넥터 체결, 12V 전원 상태, MSD 체결 상태, 평활 커패시터 방전 시간을 확인하고, 검전 전에는 계측기 자체 정상 여부를 먼저 확인합니다. 제조사 비공개 자료를 복제하지 않고 공개 가능한 일반 원리와 안전 절차 중심으로 설명합니다.`;
+  return {
+    intro: {
+      questions: [
+        { q: `${week.theme}에서 작업자가 가장 먼저 확인해야 할 안전 조건은 무엇인가요?`, a: '전원 상태, 고전압 차단 가능 여부, PPE, 작업구역 통제, 검전 가능 위치를 먼저 확인합니다.' },
+        { q: `${week.theme}의 진단에서 측정값 하나만 보고 판단하면 안 되는 이유는 무엇인가요?`, a: 'EV 계통은 배터리, 전력변환, 통신, 열관리 보호로직이 연결되어 있어 결과 DTC와 원인 DTC가 분리될 수 있기 때문입니다.' }
+      ]
+    },
+    mainContent: [
+      { title: `원리: ${week.theoryFocus[0]}`, duration: 15, content: principleDetail },
+      { title: `구조: ${week.theoryFocus[1]}`, duration: 15, content: structureDetail },
+      { title: `제어 흐름: ${week.theoryFocus[2]}`, duration: 15, content: controlDetail },
+      { title: `고장 메커니즘: ${week.faults[0]}`, duration: 15, content: faultDetail },
+      { title: `진단 포인트: ${week.faults[1]}`, duration: 15, content: diagnosisDetail },
+      { title: `안전: ${emphasis} 세션 작업한계`, duration: 15, content: safetyDetail }
+    ],
+    misconceptions: week.misconceptions,
+    summary: { nextSessionLink: day === 1 ? '다음 세션에서는 같은 주제를 고장 사례와 진단 데이터 중심으로 확장합니다. 이론②에서 만든 진단 가설은 D3 시뮬레이터의 변수 조작 과제로 이어집니다.' : `다음 시뮬레이터에서는 ${week.simulatorFocus} 속도, 전압, 온도, SOC, 통신 상태 중 어떤 변수가 결과를 바꾸는지 관찰합니다.` },
+    educatorNotes: `${week.theme} 강의는 일반 원리와 공개 가능한 정비 절차 중심으로 진행합니다. 강사는 이론 설명 후 반드시 "시뮬레이터에서 확인할 변수"를 지정합니다. 예: 정상 기준값, 위험 한계값, 보호로직 개입 조건, 오답 순서. 제조사 비공개 회로도나 서비스 매뉴얼 원문 복제는 사용하지 않습니다.`,
+    studentSlides: [
+      `1. 핵심 원리: ${week.theoryFocus[0]}의 에너지·신호 흐름`,
+      `2. 구조 이해: ${week.theoryFocus[1]}의 부품 위치, 커넥터, 냉각/통신 연결`,
+      `3. 제어 로직: ${week.theoryFocus[2]}가 허가·제한·차단을 결정하는 조건`,
+      `4. 고장 패턴: ${week.faults[0]} 발생 시 증상, DTC, 데이터 변화`,
+      `5. 진단 절차: ${week.faults[1]}를 기준값-실측값-판정으로 기록`,
+      `6. 시뮬레이터 연결: ${week.simulatorFocus}`
+    ].join('\n')
+  };
+};
+
+const buildPractice = (week: WeekPlan, weekNumber: number): PracticeData => ({
+  prerequisites: weekNumber >= 2 ? '2주차 고전압 안전 이수 필수. 미이수자는 실물 고전압 실습 금지.' : '고전압 실물 접촉 금지. 안전 관찰과 절차 시뮬레이션만 수행.',
+  equipment: week.equipment,
+  safety: {
+    level: weekNumber <= 2 || week.theme.includes('절연') || week.theme.includes('캡스톤') ? 'high' : 'medium',
+    rules: [
+      '작업 전 전원 상태와 READY 표시를 확인한다.',
+      '고전압 계통은 차단, 대기, 검전 전까지 접촉하지 않는다.',
+      '측정값은 단위, 측정 위치, 기준값과 함께 기록한다.',
+      '위험 단계에서는 반드시 2인 1조로 상호 확인한다.'
+    ]
+  },
+  steps: [
+    { id: 'p1', action: '작업지시서에서 증상, 차량상태, 금지작업을 확인한다.', safetyMeasure: '정보 누락 시 실습을 시작하지 않는다.' },
+    { id: 'p2', action: 'PPE와 계측기 외관, 배터리, 리드선 손상 여부를 점검한다.', safetyMeasure: '절연장갑 핀홀 또는 계측기 손상이 있으면 즉시 교체한다.' },
+    { id: 'p3', action: '차량 전원 OFF, 12V 차단, MSD 탈거 필요 여부를 판단한다.', safetyMeasure: '고전압 실물 접근은 안전 이수자만 수행한다.' },
+    { id: 'p4', action: `${week.practiceTopic}의 기준 측정 위치를 표시하고 기준값을 확인한다.`, safetyMeasure: '측정 범위와 단자 극성을 먼저 설정한다.' },
+    { id: 'p5', action: '정상 시나리오 측정값을 기록하고 데이터 스트림과 비교한다.' },
+    { id: 'p6', action: `${week.faults[0]} 시나리오를 적용하고 증상, DTC, 측정값 차이를 기록한다.`, safetyMeasure: '이상값 발견 시 임의 초기화하지 말고 교수자에게 보고한다.' },
+    { id: 'p7', action: `${week.faults[1]} 가능성을 회로도 또는 데이터 흐름 기준으로 배제/확정한다.` },
+    { id: 'p8', action: '복구, 재검증, 작업장 정리, 고객 설명용 요약을 작성한다.' }
+  ],
+  scenarios: [
+    { normal: `${week.practiceTopic}: 기준값과 데이터 스트림이 허용범위 안에 있고 관련 DTC가 없다.`, abnormal: `${week.faults[0]}: 증상 재현 후 안전 차단, 측정, 원인 후보 기록 순서로 대응한다.` },
+    { normal: '작업 후 재검증에서 경고등과 DTC가 재발하지 않는다.', abnormal: `${week.faults[1]}: 단일 부품 교환 전 전원·통신·열관리 조건을 교차 확인한다.` }
+  ],
+  checklist: [
+    { item: '고전압 안전 절차 준수', points: 25 },
+    { item: '계측기 설정과 측정 위치 정확성', points: 20 },
+    { item: '정상/이상 데이터 비교 기록', points: 20 },
+    { item: '진단 근거와 결론의 일치성', points: 20 },
+    { item: '정리·복구·보고 품질', points: 15 }
+  ]
+});
+
+const buildEvaluation = (week: WeekPlan, weekNumber: number): EvaluationData => {
+  const isCumulative = [4, 8, 12, 16].includes(weekNumber);
+  return {
+    type: weekNumber === 16 ? 'capstone' : isCumulative ? 'cumulative' : 'formative',
+    passCriteria: isCumulative ? '70점 이상 합격. 미달 시 오답 주제 보충학습과 실습 재수행.' : '60점 이상 합격. 미달 시 핵심 안전·진단 문항 재교육.',
+    questions: [
+      { id: `w${weekNumber}-q1`, type: 'multiple_choice', question: `${week.theme}에서 실물 실습 전 반드시 확인해야 하는 조건은?`, options: ['DTC 삭제', '고전압 안전 절차와 PPE 확인', '충전량 100%', '시동 READY 유지'], answer: 1, explanation: 'EV 실습은 차단, 검전, PPE 확인이 선행되어야 한다.', points: 10 },
+      { id: `w${weekNumber}-q2`, type: 'multiple_choice', question: `${week.faults[0]} 사례에서 가장 적절한 진단 접근은?`, options: ['부품부터 교환한다', '증상-DTC-측정값을 연결해 원인을 좁힌다', '경고등을 삭제한다', '충전 후 다시 본다'], answer: 1, explanation: '복합 계통은 근거 기반 진단 루프가 필요하다.', points: 10 },
+      { id: `w${weekNumber}-q3`, type: 'multiple_choice', question: `다음 중 ${week.theme} 학습에서 부적절한 행동은?`, options: ['측정 위치 기록', '기준값 확인', '임의 커넥터 탈거', '교수자 보고'], answer: 2, explanation: '고전압·통신 커넥터 임의 탈거는 2차 고장과 안전사고로 이어진다.', points: 10 },
+      { id: `w${weekNumber}-q4`, type: 'multiple_choice', question: `${week.theoryFocus[0]}를 현장 진단과 연결할 때 필요한 자료는?`, options: ['증상, 회로도, 데이터 스트림, 측정값', '차량 색상', '타이어 브랜드', '주행 음악 설정'], answer: 0, explanation: '진단에는 증상과 계통 정보를 연결하는 자료가 필요하다.', points: 10 }
+    ],
+    rubric: [
+      { criterion: '안전절차', levels: [{ label: '미흡', score: 1 }, { label: '보통', score: 2 }, { label: '우수', score: 3 }, { label: '탁월', score: 4 }] },
+      { criterion: '진단근거', levels: [{ label: '미흡', score: 1 }, { label: '보통', score: 2 }, { label: '우수', score: 3 }, { label: '탁월', score: 4 }] },
+      { criterion: '보고품질', levels: [{ label: '미흡', score: 1 }, { label: '보통', score: 2 }, { label: '우수', score: 3 }, { label: '탁월', score: 4 }] }
+    ]
+  };
+};
+
+const buildSessions = (week: WeekPlan, weekNumber: number): Session[] => [
+  {
+    id: `w${weekNumber}-d1`,
+    day: 1,
+    type: 'theory',
+    rhythmLabel: 'D1 이론①',
+    title: `${week.theme} - 이론① 원리·구조`,
+    duration: 120,
+    ncsUnit: week.ncs,
+    objectives: [`${week.theoryFocus[0]}의 원리를 설명한다.`, '주요 구성품과 에너지·신호 흐름을 구분한다.'],
+    simulatorId: week.simulatorId,
+    theoryData: buildTheory(week, 1),
+    practiceData: buildPractice(week, weekNumber)
+  },
+  {
+    id: `w${weekNumber}-d2`,
+    day: 2,
+    type: 'theory',
+    rhythmLabel: 'D2 이론②+개념점검',
+    title: `${week.theme} - 이론② 고장·진단`,
+    duration: 120,
+    ncsUnit: week.ncs,
+    objectives: [`${week.faults[0]}의 고장 메커니즘을 설명한다.`, '정상값과 이상값을 근거로 진단 가설을 세운다.'],
+    simulatorId: week.simulatorId,
+    theoryData: buildTheory(week, 2),
+    practiceData: buildPractice(week, weekNumber)
+  },
+  {
+    id: `w${weekNumber}-d3`,
+    day: 3,
+    type: 'simulator',
+    rhythmLabel: 'D3 시뮬레이터',
+    title: `${week.theme} - 가상실습 시뮬레이터`,
+    duration: 120,
+    ncsUnit: week.ncs,
+    objectives: [week.simulatorFocus, '잘못된 조작 순서와 보호로직 개입 이유를 설명한다.'],
+    simulatorId: week.simulatorId,
+    theoryData: buildTheory(week, 2),
+    practiceData: buildPractice(week, weekNumber)
+  },
+  {
+    id: `w${weekNumber}-d4`,
+    day: 4,
+    type: 'practice',
+    rhythmLabel: weekNumber === 1 ? 'D4 안전절차 관찰실습' : 'D4 실물실습',
+    title: `${week.theme} - ${week.practiceTopic}`,
+    duration: 120,
+    ncsUnit: week.ncs,
+    objectives: [`${week.practiceTopic} 절차를 체크리스트에 따라 수행한다.`, '측정값을 기준값과 비교해 정상/이상을 판정한다.'],
+    simulatorId: week.simulatorId,
+    theoryData: buildTheory(week, 2),
+    practiceData: buildPractice(week, weekNumber)
+  },
+  {
+    id: `w${weekNumber}-d5`,
+    day: 5,
+    type: 'evaluation',
+    rhythmLabel: [4, 8, 12, 16].includes(weekNumber) ? 'D5 누적평가' : 'D5 형성평가',
+    title: `${week.theme} - ${weekNumber === 16 ? '최종 캡스톤 평가' : [4, 8, 12, 16].includes(weekNumber) ? '누적평가' : '형성평가'}`,
+    duration: 120,
+    ncsUnit: week.ncs,
+    objectives: ['주간 학습목표 달성도를 확인한다.', '미흡 영역을 보충학습 계획으로 연결한다.'],
+    evaluationData: buildEvaluation(week, weekNumber)
+  }
+];
 
 export const curriculumData: Curriculum = {
-  title: "전기자동차 기술인력양성 과정",
-  target: "내연기관 정비 경력자 EV전환",
-  level: "중급",
-  totalHours: 120,
-  weeks: Array.from({ length: 12 }, (_, i) => ({
-    weekNumber: i + 1,
-    theme: "",
-    sessions: [] // Let the generator below build them fully
+  title: '전기자동차 기술인력양성 과정',
+  target: '내연기관 정비 경력자 EV전환',
+  level: '중급',
+  totalHours: 160,
+  weeks: weekPlans.map((week, index) => ({
+    weekNumber: index + 1,
+    theme: week.theme,
+    sessions: buildSessions(week, index + 1)
   }))
 };
-
-// Generate detailed, specific data for all weeks dynamically to ensure perfect coverage without generic fallbacks
-const weekSpecificData: Record<number, any> = {
-    1: { theme: "EV 개론 + 고전압 안전 ①", theory: { questions: [{ q: "내연기관차와 전기차의 가장 큰 차이점은 무엇일까요?", a: "내연기관은 연료를 태워 힘을 얻지만, 전기차는 배터리의 전기 에너지를 모터로 보내 구동합니다. 이 과정에서 고전압이 사용됩니다." }, { q: "우리 주변에서 300V 이상의 전압을 사용하는 곳은 어디일까요?", a: "산업용 모터(380V), 지하철 등에서 사용됩니다. 전기차는 400V~800V를 사용하여 이러한 산업용 장비와 유사한 위험도를 가집니다." }], content: [{ title: "전기차 원리 및 구조", duration: 45, content: "배터리 -> 인버터 -> 모터로 이어지는 동력 전달 흐름 이해." }, { title: "고전압의 정의 및 인체 영향", duration: 45, content: "DC 60V, AC 30V 이상. 감전 시 전류 경로와 심실세동." }], misconception: { wrong: "절연장갑만 끼면 모든 고전압 작업이 안전하다.", correction: "장갑은 최후 보루이며, 물리적 차단 및 검전 절차가 최우선입니다." } }, practice: { eq: ["절연장갑", "절연복"], rules: ["2인 1조 작업"], steps: ["MSD 해탈거 전 준비사항 점검"] }, defaultSimId: "safety_procedure" },
-    2: { theme: "고전압 안전 ②", theory: { questions: [{ q: "왜 12V 배터리가 여전히 전기차에 필요할까요?", a: "고전압 배터리를 제어하는 BMS와 차량 내 전장품(디스플레이, 조명 등)을 구동하기 위해 필요합니다." }, { q: "절연 파괴란 무엇을 의미하나요?", a: "전기가 흐르지 않아야 할 곳(샤시 등)으로 누설 전류가 발생하는 위험한 상태를 말합니다." }], content: [{ title: "절연저항 측정 원리", duration: 45, content: "메거(절연저항계)를 이용하여 고전압 선로와 차체 간의 절연 상태를 점검하는 방법." }, { title: "차단/검전 프로세스 심화", duration: 45, content: "서비스 플러그 탈거 후 인버터의 평활 커패시터 완전 방전까지 대기하는 절차." }], misconception: { wrong: "멀티미터로 아무 곳이나 찍어보면 절연을 확인할 수 있다.", correction: "정확한 핀 포인트(인버터 입력단 등) 지정과 메거를 통한 고전압 인가 측정이 필수입니다." } }, practice: { eq: ["CAT III 멀티미터", "메거 테스터기"], rules: ["검전 전 멀티미터 자체 정상작동 확인"], steps: ["서비스 플러그 탈거", "인버터 P/N 단자 검전 (0V 확인)"] }, defaultSimId: "safety_procedure" },
-    3: { theme: "고전압 배터리 팩, 열폭주, 열관리", theory: { questions: [{ q: "스마트폰 배터리와 전기차 배터리의 차이는 무엇일까요?", a: "기본적인 리튬이온 원리는 같으나, 전기차는 수백 개의 셀이 직병렬로 연결되어 고전압/고용량을 이룹니다." }, { q: "배터리 열폭주(Thermal Runaway)란 무엇인가요?", a: "배터리 내부 단락 등으로 온도가 급격히 상승해 연쇄적인 폭발/화재로 이어지는 현상입니다." }], content: [{ title: "셀, 모듈, 팩의 구조", duration: 40, content: "기본 단위인 셀부터 최종 차량 장착 형태인 팩까지의 물리적/전기적 구성." }, { title: "배터리 열폭주 메커니즘", duration: 50, content: "내부 단락, 과충전, 충격 피로로 인한 분리막 손상과 산소 발생 과정." }], misconception: { wrong: "전기차 배터리는 물을 뿌리면 바로 꺼진다.", correction: "화학 화재로 일반적인 소화기로 진압이 어려우며, 하부 수조나 단열재로 진압해야 합니다." } }, practice: { eq: ["적외선 열화상 카메라", "소화기"], rules: ["PPE 착용 필수"], steps: ["배터리 표면 온도 측정", "열화상 카메라로 핫스팟 확인"] }, defaultSimId: "bms_simulator" },
-    4: { theme: "BMS 로직, SOC/SOH, 셀 밸런싱", theory: { questions: [{ q: "BMS가 고장나면 자동차는 어떻게 될까요?", a: "과충전 또는 과방전을 막을 수 없어 화재 위험이 생기고, 차량은 구동을 강제 차단합니다." }, { q: "100% 충전이라고 뜨는데 실제로는 100%가 아니라고요?", a: "배터리 수명 보호를 위해 상하단 마진(Buffer)을 두어 사용 가능한 SoC 내에서만 운용합니다." }], content: [{ title: "SOC(충전량) / SOH(건전상태) 추정", duration: 45, content: "전류 적산법과 개방회로 전압(OCV)을 혼합하여 배터리 상태를 계산하는 펌웨어 로직." }, { title: "수동/능동 셀 밸런싱", duration: 45, content: "편차가 발생한 셀의 전압을 저항 열로 태워 맞추는(Passive) 과정과, 에너지를 이동시키는(Active) 원리." }], misconception: { wrong: "셀 간 전압 편차가 0.5V면 정상적인 오차 범위다.", correction: "전기차 셀 편차가 0.1V 이상만 되어도 BMS는 이상 상태로 간주하고 출력을 제한합니다." } }, practice: { eq: ["진단 스캐너", "오실로스코프"], rules: ["BMS 커넥터 임의 탈거 금지"], steps: ["스캐너 데이터로 셀 간 전압 편차 및 밸런싱 트리거 여부 확인"] }, defaultSimId: "bms_simulator" },
-    5: { theme: "구동 모터 (PMSM/유도전동기)", theory: { questions: [{ q: "전기차에는 원래 변속기가 없나요?", a: "모터는 넓은 RPM 대역에서 높은 토크를 내므로 보통 1단 감속기만 사용합니다 (일부 고성능 제외)." }, { q: "전기차 모터는 영구자석만 사용하나요?", a: "주로 영구자석 동기모터(PMSM)를 쓰지만, 희토류 저감을 위해 유도전동기를 혼용하기도 합니다." }], content: [{ title: "구동 모터(PMSM/유도전동기) 원리", duration: 45, content: "회전자 3상 교류 인가에 따른 회전 자계 형성과 토크 발생." }, { title: "리졸버(Resolver) 센서", duration: 45, content: "모터의 절대 위치를 파악해 인버터가 정확한 타이밍에 스위칭할 수 있도록 돕는 핵심 센서." }], misconception: { wrong: "전기차 모터는 수명이 무한하다.", correction: "모터 내부 베어링 마모 및 절연 파괴에 의한 권선 소손이 발생할 수 있습니다." } }, practice: { eq: ["절연저항계", "오실로스코프"], rules: ["모터 표면 고온 주의"], steps: ["3상 U, V, W 권선 저항 측정", "회전자 리졸버 파형 진단"] } },
-    6: { theme: "전력변환 (인버터, DC-DC, OBC)", theory: { questions: [{ q: "인버터는 정확히 어떤 역할을 하죠?", a: "배터리의 직류(DC) 전기를 모터 구동을 위한 교류(AC)로 변환하고, 모터 RPM을 정밀 제어합니다." }, { q: "LDC(Low DC-DC Converter)란 무엇인가요?", a: "내연기관의 발전기(알터네이터)를 대신하여, 고전압을 12V로 낮춰 전장품에 공급합니다." }], content: [{ title: "IGBT/SiC 전력 소자의 이해", duration: 45, content: "빠른 스위칭으로 3상 교류를 생성하는 핵심 반도체. 기존 Si와 최신 SiC 소자의 효율 차이." }, { title: "OBC와 LDC의 기능 통합 (ICCU)", duration: 45, content: "완속 충전을 위한 직교류 변환(OBC)과 전장 전원(LDC)을 하나의 모듈로 통합하는 추세." }], misconception: { wrong: "인버터 내부는 열이 나지 않는다.", content: "스위칭 손실로 엄청난 열이 발생하므로 강력한 수랭식 냉각 회로가 필수적입니다." } }, practice: { eq: ["절연공구 세트", "멀티미터"], rules: ["캡 방전 시간 5분 이상 준수"], steps: ["인버터 평활 커패시터 잔류 전압 확인", "LDC 출력 12~14V 거동 확인"] } },
-    7: { theme: "충전 시스템", theory: { questions: [{ q: "급속 충전과 완속 충전의 가장 큰 차이는요?", a: "완속은 차내 OBC를 통해 교류를 직류로 바꿔 충전하고, 급속은 외부 충전소에서 이미 직류로 변환해 배터리에 다이렉트로 밀어넣습니다." }, { q: "충전 80% 이후에 속도가 느려지는 이유는요?", a: "배터리 스트레스(수명) 보호와 화재 방지를 위해 CC(정전류)방식에서 CV(정전압) 방식으로 제어를 전환하기 때문입니다." }], content: [{ title: "완속/급속 충전 통신 프로토콜", duration: 50, content: "J1772, CCS 콤보 규격 및 PWM 제어를 통한 차량과 충전기 간 통신 접속 구조." }, { title: "충전 계통 고장 진단", duration: 40, content: "차데모(CHAdeMO), 충전 인렛 온도 센서 불량에 따른 충전 중단 메커니즘 분석." }], misconception: { wrong: "무조건 100% 급속 충전을 반복하는 것이 좋다.", correction: "잦은 100% 급속 충전은 리튬 도금 현상(Lithium plating)을 유발해 수명을 급감시킵니다." } }, practice: { eq: ["스캐너", "충전 인렛 테스터"], rules: ["인터록 회로 점검 유의"], steps: ["충전 인렛 통신선 핀 전압 측정", "플러그 체결 상태(CP/PE 회로) 진단"] } },
-    8: { theme: "열관리·공조", theory: { questions: [{ q: "히트펌프가 왜 겨울철에 전기차 주행거리를 늘려주나요?", a: "단순히 열선을 켜는 PTC 방식과 달리, 외부나 전장 폐열을 모아 압축하여 난방 에너지로 활용하기 때문입니다." }, { q: "에어컨 컴프레서는 엔진 없이 어떻게 돌아가요?", a: "고전압 배터리로 직접 회전하는 전동식 컴프레서(e-Comp)가 탑재되어 있습니다." }], content: [{ title: "전동식 공조(PTC & e-Comp)", duration: 45, content: "고전압을 통한 즉각적인 난방(PTC) 및 전동식 냉매 압축기 구조." }, { title: "히트펌프와 통합 열관리 시스템", duration: 45, content: "배터리 냉각수-모터 냉각수-실내 공조를 유기적으로 연결하는 8방향 밸브 시스템." }], misconception: { wrong: "전동 컴프레서에는 아무 에어컨 오일이나 넣어도 된다.", correction: "일반 PAG 오일 사용 시 절연이 파괴되어 고전압 누전이 발생합니다. 반드시 전기차 전용 POE 규격 오일을 사용해야 합니다." } }, practice: { eq: ["공조기 매니폴드 게이지", "메거"], rules: ["절연 POE 오일 오염 주의"], steps: ["전동 컴프레서 절연상태 진단", "히트펌프 밸브 동작 데이터 스트림 검사"] } },
-    9: { theme: "차량 네트워크·진단", theory: { questions: [{ q: "내연기관의 ECU가 전기차에서는 뭐라고 불리나요?", a: "전기차의 최상위 두뇌는 VCU(Vehicle Control Unit)라고 부릅니다. 브레이크, 가속, 전원 전체를 조율합니다." }, { q: "통신선 하나가 끊어지면 차가 멈추나요?", a: "고전압 CAN 통신과 섀시 CAN 통신이 분리되어 있고 우회 로직이 있으나 주요 파워 파츠 통신 단절 시 안전 제어 모드로 진입합니다." }], content: [{ title: "CAN/CAN-FD 네트워크 구조", duration: 40, content: "고속 통신이 필수인 전동화 시스템 통신망(E-GMP 기준 등) 트러블슈팅 접근법." }, { title: "VCU 통합 제어 알고리즘", duration: 50, content: "가속페달(APS)의 신호를 받아 요구 토크를 인버터로 지시하는 시그널 흐름 분석." }], misconception: { wrong: "스캐너로 고장 코드만 지우면 고쳐진다.", correction: "전기차의 고장 코드는 물리적 센서 오류인지, 단순 통신 딜레이인지, BMS에서 차단한 것인지 원인 추적이 최우선입니다." } }, practice: { eq: ["오실로스코프", "진단 스캐너"], rules: ["데이터링크 커넥터 단락 지양"], steps: ["High/Low CAN 파형 분석", "VCU 센서값 모니터링 실습"] } },
-    10: { theme: "회생제동·진단 실무", theory: { questions: [{ q: "브레이크 패드가 전기차에서는 덜 닳는 이유가 뭘까요?", a: "운동에너지를 다시 배터리로 충전시키는 '회생 제동' 모터 저항이 브레이크 역할을 대신하기 때문입니다." }, { q: "마찰 브레이크와 회생 제동은 어떻게 이중으로 제어되나요?", a: "브레이크 페달을 밟으면 iEB(전동식 브레이크)가 판단해 1차로 모터 저항을, 2차로 유압 브레이크를 유기적으로 전환합니다." }], content: [{ title: "회생제동 (Regenerative Braking)", duration: 45, content: "모터를 발전기로 전환하여 충전과 제동 토크를 동시 발생시키는 로직." }, { title: "전동식 통합 브레이크 시스템 작동", duration: 45, content: "진공 서보가 없는 전기차 특성상 펌프 기반 통합 브레이크 모듈의 유압 분배 원리." }], misconception: { wrong: "원페달 드라이빙 시 마찰 브레이크는 아예 쓰이지 않는다.", correction: "정차 직전이나 긴급 제동 시에는 물리적 유압 캘리퍼가 반드시 작동합니다." } }, practice: { eq: ["브레이크 오일 교환기", "스캐너"], rules: ["캘리퍼 교체 시 전자식 파킹 해제 필수"], steps: ["진단기로 회생토크 전환 데이터 비교", "iEB 에어빼기 실무 모드 구동"] } },
-    11: { theme: "연계기술 (V2G/배터리 재사용)", theory: { questions: [{ q: "내 차의 전기로 바깥의 가전제품을 어떻게 쓰나요?", a: "V2L 기술을 통해 차내 인버터를 역구동시켜 고전압 직류를 220V 교류로 변환하여 출력합니다." }, { q: "10년 탄 전기차 배터리는 그냥 폐기하나요?", a: "차랑용 출력(SOH 70% 이하)은 미달이어도, 태양광 연계 ESS 장치로 재사용(Second Life)이 가능합니다." }], content: [{ title: "V2L, V2G 전력망 연계 시스템", duration: 50, content: "양방향 OBC 탑재 구조 및 그리드 동기화(Grid-Sync) 프로세스." }, { title: "사용 후 배터리 진단 및 잔존가치", duration: 40, content: "교체된 팩의 해체 기술, 모듈 단위 수명(SOH 검증) 및 재조립(Re-manufacturing) 개론." }], misconception: { wrong: "V2L을 쓰면 자동차 배터리가 금방 죽는다.", correction: "BMS가 V2L 방전 마지노성(예: 20%)을 설정해두어 심방전을 막아 수명에 큰 영향이 없습니다." } }, practice: { eq: ["V2L 외부 커넥터", "220V 부하 테스터"], rules: ["우천 시 V2L 실습 주의"], steps: ["V2L 커넥터 장착 및 방전 한계 퍼센트 설정", "교류 출력 파형 안정성 확인"] } },
-    12: { theme: "종합 진단 프로젝트 (캡스톤)", theory: { questions: [{ q: "지금까지 배운 전기차 진단 프로세스에서 가장 중요한 제 1원칙은?", a: "무엇보다 작업자와 사용자(운전자)의 '안전' 확보 (차단, 검전) 기반 증상 진단입니다." }, { q: "실제 현장에서 원인 불명 고장이 났을 때 접근 방식은?", a: "스캐너 고장 코드 기록 -> 네트워크 단절 여부 -> BMS 차단 조건 확인 -> 기계적/절연 점검 순으로 접근합니다." }], content: [{ title: "전기자동차 통합 트러블슈팅 사례", duration: 60, content: "대표 고장 7대 사례 분석 (충전불가, 주행중 시동꺼짐, 절연경고고장 등)." }, { title: "정비 현장 안전 법규 및 실무 리뷰", duration: 30, content: "사업장 내 전용 워크베이 안전 기준, 소화 방재 설비 요건." }], misconception: { wrong: "현장에서는 매뉴얼보다 직감이 더 빠르다.", correction: "연결망이 복잡한 전기차는 정비지침서 데이터와 흐름도를 따라가지 않으면 2차 파손이 생깁니다." } }, practice: { eq: ["EV 진단 세트 전체", "PPE 풀세트"], rules: ["안전 감시에 의한 평가 진행"], steps: ["고객 문진 시뮬레이션", "주어진 고장 트러블코드 바탕으로 최종 진단 솔루션 도출 평가 및 브리핑"] } }
-};
-
-// Fill empty weeks and inject rich specific data to ensure no 'preparing' screens
-curriculumData.weeks.forEach(week => {
-    const targetData = weekSpecificData[week.weekNumber] || weekSpecificData[1];
-    week.theme = targetData.theme;
-    
-    // Day 1~4 are 'learning' (Theory + Practice Simulator integration)
-    for (let i = 1; i <= 4; i++) {
-        week.sessions.push({
-            id: `w${week.weekNumber}-d${i}`,
-            day: i,
-            type: "learning",
-            title: `${week.theme} - 실무 통합 세션 ${i}`,
-            duration: 120,
-            objectives: [`${week.theme}의 핵심 원리와 제어로직을 완벽히 이해한다.`, `가상 시뮬레이터 실습을 수행한다.`],
-            simulatorId: targetData.defaultSimId || "interactive_powertrain",
-            theoryData: {
-                intro: { questions: targetData.theory.questions },
-                mainContent: targetData.theory.content,
-                misconceptions: [ targetData.theory.misconception ],
-                summary: { nextSessionLink: "" }
-            },
-            practiceData: {
-                prerequisites: `${week.theme} 이론 수료`,
-                equipment: targetData.practice.eq,
-                safety: { level: 'high', rules: targetData.practice.rules },
-                steps: targetData.practice.steps.map((action: string, idx: number) => ({
-                     id: `s${idx}`, action: action, safetyMeasure: "안전수칙 위반 시 감점 주의"
-                })),
-                scenarios: [ { normal: "정상 진단 수치 도출 확인", abnormal: "경고 알람 발생 시 절차 대응" } ],
-                checklist: [ { item: "작업 지침 준수", points: 10 }, { item: "안전성 확보", points: 20 } ]
-            }
-        });
-    }
-
-    // Day 5 is evaluation
-    week.sessions.push({
-        id: `w${week.weekNumber}-d5`,
-        day: 5,
-        type: "evaluation",
-        title: `${week.theme} 주간 종합 평가`,
-        duration: 120,
-        objectives: ["학습한 이론과 실습 내용을 바탕으로 주간 성취도를 평가합니다."],
-        evaluationData: {
-            type: 'formative',
-            passCriteria: "60점 이상 합격",
-            questions: [
-                { 
-                    id: `q-eval-${week.weekNumber}`, 
-                    type: "multiple_choice", 
-                    question: `${week.theme} 주제에서 가장 핵심적인 주의사항 및 동작 원리로 올바른 것은?`, 
-                    options: ["스캐너 데이터 맹신", "작업 전 고전압 차단 및 검전, 그리고 스캐너 데이터의 정밀한 교차 분석", "시동 상태 유지", "임의 커넥터 해탈거"], 
-                    answer: 1, 
-                    explanation: `${week.theme}에서 가장 핵심은 모니터링 수치 확인과 물리적인 안전 검전을 병행하는 것입니다.`, 
-                    points: 10 
-                }
-            ]
-        }
-    });
-
-    // Sort just in case
-    week.sessions.sort((a, b) => a.day - b.day);
-});

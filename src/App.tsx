@@ -10,13 +10,16 @@ import { LearningView } from './components/views/LearningView';
 import { EvaluationView } from './components/views/EvaluationView';
 import { useVehicleStore } from './store/vehicleStore';
 import { Power, FileWarning } from 'lucide-react';
+import { languageOptions, t, translateSessionTitle, useLanguageStore } from './i18n';
 
 export default function App() {
-  const [activeSessionId, setActiveSessionId] = useState('w1-d1');
+  const [activeSessionId, setActiveSessionId] = useState('w1-d3');
   const tickSimulation = useVehicleStore(state => state.tickSimulation);
   const powerMode = useVehicleStore(state => state.powerMode);
   const setPowerMode = useVehicleStore(state => state.setPowerMode);
   const msdConnected = useVehicleStore(state => state.msdConnected);
+  const language = useLanguageStore(state => state.language);
+  const setLanguage = useLanguageStore(state => state.setLanguage);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -35,11 +38,14 @@ export default function App() {
 
     switch (session.type) {
       case 'learning':
+      case 'theory':
+      case 'simulator':
+      case 'practice':
         return <LearningView session={session} />;
       case 'evaluation':
         return <EvaluationView session={session} />;
       default:
-        return <div className="p-8 text-slate-500">Preparation in progress...</div>;
+        return <div className="p-8 text-slate-500">{t(language, 'preparation')}</div>;
     }
   };
 
@@ -55,9 +61,21 @@ export default function App() {
         <header className="h-14 border-b border-slate-800 flex items-center justify-between px-6 bg-slate-900/50 shrink-0">
           <div className="flex items-center gap-4">
              <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center font-bold text-white">EV</div>
-             <h1 className="text-lg font-semibold tracking-tight text-slate-200">전기자동차 기술인력양성 통합 교육 플랫폼 <span className="text-slate-500 font-normal ml-2 text-sm uppercase">Enterprise Edition</span></h1>
+             <h1 className="text-lg font-semibold tracking-tight text-slate-200">{t(language, 'appTitle')} <span className="text-slate-500 font-normal ml-2 text-sm uppercase">{t(language, 'edition')}</span></h1>
           </div>
           <div className="flex items-center gap-6">
+             <label className="flex items-center gap-2 rounded border border-slate-700 bg-slate-800 px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+               <span>{t(language, 'language')}</span>
+               <select
+                 value={language}
+                 onChange={event => setLanguage(event.target.value as typeof language)}
+                 className="bg-slate-950 text-slate-200 outline-none rounded px-2 py-1 border border-slate-700"
+               >
+                 {languageOptions.map(option => (
+                   <option key={option.value} value={option.value}>{option.label}</option>
+                 ))}
+               </select>
+             </label>
              <div className="flex items-center gap-2 bg-slate-800 p-1 rounded border border-slate-700">
                 <button 
                   onClick={() => msdConnected && setPowerMode('OFF')}
@@ -77,8 +95,8 @@ export default function App() {
              </div>
              
              <div className="flex flex-col items-end border-l border-slate-800 pl-6">
-               <span className="text-xs text-slate-400">현재 과정: [{curriculumData.target}]</span>
-               <span className="text-xs font-mono text-blue-400">PROGRESS: WEEK 4 / 12 (33%)</span>
+               <span className="text-xs text-slate-400">{t(language, 'currentCourse')}: [{t(language, 'courseTarget')}]</span>
+               <span className="text-xs font-mono text-blue-400">{t(language, 'weeksSummary')}</span>
              </div>
              <div className="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs text-slate-300 font-bold tracking-wider">SK</div>
           </div>
@@ -90,7 +108,7 @@ export default function App() {
                   {session ? `DAY ${session.day} · ${session.type.toUpperCase()}` : 'LOADING'}
               </div>
               <h2 className="text-xl font-bold text-white tracking-tight">
-                {session?.title}
+                {session ? translateSessionTitle(session.title, language) : ''}
               </h2>
             </div>
             {renderContent()}
@@ -98,9 +116,9 @@ export default function App() {
 
         <footer className="h-8 border-t border-slate-800 bg-slate-900 flex items-center justify-between px-6 shrink-0">
            <div className="flex items-center gap-4">
-             <span className="text-[10px] text-slate-500">TRAINING MODE: <strong className="text-slate-400">INTERACTIVE SIMULATION</strong></span>
+             <span className="text-[10px] text-slate-500">{t(language, 'trainingMode')}: <strong className="text-slate-400">{t(language, 'interactiveSimulation')}</strong></span>
              <span className="w-px h-3 bg-slate-700"></span>
-             <span className="text-[10px] text-slate-500">SERVER: <strong className="text-slate-400">KOREA-EDU-HQ-01</strong></span>
+             <span className="text-[10px] text-slate-500">{t(language, 'server')}: <strong className="text-slate-400">KOREA-EDU-HQ-01</strong></span>
            </div>
            <div className="flex items-center gap-3">
              <div className="flex items-center gap-1.5">

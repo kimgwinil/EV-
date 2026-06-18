@@ -82,6 +82,11 @@ export function InteractivePowertrain({ title, targetTheme }: { title: string; t
   }, [bmsFault, driveMode, inverterTemp, motorTemp, msdConnected, powerMode]);
 
   const wheelDuration = vehicleSpeed > 0 ? `${Math.max(0.18, 2.6 - vehicleSpeed / 34)}s` : '0s';
+  const roadDashDuration = `${Math.max(0.22, 2.2 - vehicleSpeed / 45)}s`;
+  const roadDashStyle = {
+    '--road-dash-duration': roadDashDuration,
+    '--road-dash-play-state': vehicleSpeed > 0 ? 'running' : 'paused',
+  } as React.CSSProperties;
   const selectedPart = POWERTRAIN_PARTS.find(part => part.id === selectedPartId) || POWERTRAIN_PARTS[0];
 
   const handleReady = () => {
@@ -123,7 +128,7 @@ export function InteractivePowertrain({ title, targetTheme }: { title: string; t
                 }}
               >
                 <div className="relative min-h-[440px] overflow-hidden rounded-lg border border-slate-800 bg-slate-950">
-                  <div className="absolute inset-0 blueprint-floor" />
+                  <div className="absolute inset-0 blueprint-floor" style={roadDashStyle} />
                   <div className="absolute inset-0 bg-gradient-to-b from-slate-950/20 via-slate-950/60 to-slate-950" />
                   <div className="absolute left-0 right-0 bottom-0 h-24 bg-slate-900/90" />
 

@@ -23,6 +23,11 @@ export function EvExplorer({ className = '', defaultHighlight }: Props) {
   
   const { packSoc, sysVoltage, motorRpm, inverterTemp, bmsFault, obcActive, msdConnected, powerMode, vehicleSpeed } = useVehicleStore();
   const wheelDuration = vehicleSpeed > 0 ? `${Math.max(0.2, 2.6 - vehicleSpeed / 36)}s` : '0s';
+  const roadDashDuration = `${Math.max(0.22, 2.2 - vehicleSpeed / 45)}s`;
+  const roadDashStyle = {
+    '--road-dash-duration': roadDashDuration,
+    '--road-dash-play-state': vehicleSpeed > 0 ? 'running' : 'paused',
+  } as React.CSSProperties;
   const activeComponent = COMPONENTS.find(comp => comp.id === activeId) || COMPONENTS[0];
 
   const getLiveStats = (id: string, isBlock: boolean = false) => {
@@ -82,7 +87,7 @@ export function EvExplorer({ className = '', defaultHighlight }: Props) {
        >
          {/* Diagram Area */}
          <div className="flex-1 bg-slate-950 rounded border border-slate-800 relative h-[360px] overflow-hidden flex items-center justify-center">
-            <div className="absolute inset-0 blueprint-floor" />
+            <div className="absolute inset-0 blueprint-floor" style={roadDashStyle} />
             <div className="absolute inset-0 bg-gradient-to-b from-slate-950/20 via-slate-950/65 to-slate-950" />
             <div className="absolute bottom-0 left-0 right-0 h-12 bg-slate-900/70" />
             <div className={`ev-hover-info-card absolute bottom-3 left-1/2 z-40 w-[340px] -translate-x-1/2 rounded-lg border p-3 shadow-[0_18px_38px_rgba(0,0,0,0.42)] backdrop-blur transition-all duration-200 ${getToneClasses(activeComponent.color)}`}>

@@ -533,7 +533,8 @@ body {
     0 0 0 1px rgba(15,23,42,0.1),
     0 0 14px rgba(255,255,255,0.38);
   opacity: 0.92;
-  animation: roadDashFlow 1.15s linear infinite;
+  animation: roadDashFlow var(--road-dash-duration, 1.15s) linear infinite;
+  animation-play-state: var(--road-dash-play-state, running);
 }
 
 .blueprint-floor::before {

@@ -10,7 +10,7 @@ import { LearningView } from './components/views/LearningView';
 import { EvaluationView } from './components/views/EvaluationView';
 import { useVehicleStore } from './store/vehicleStore';
 import { Power, FileWarning } from 'lucide-react';
-import { languageOptions, t, translateSessionTitle, useLanguageStore } from './i18n';
+import { languageOptions, t, translateContent, translateSessionTitle, useLanguageStore } from './i18n';
 
 export default function App() {
   const [activeSessionId, setActiveSessionId] = useState('w1-d3');
@@ -108,7 +108,7 @@ export default function App() {
                   {session ? `DAY ${session.day} · ${session.type.toUpperCase()}` : 'LOADING'}
               </div>
               <h2 className="text-xl font-bold text-white tracking-tight">
-                {session ? translateSessionTitle(session.title, language) : ''}
+                {session ? translateContent(translateSessionTitle(session.title, language), language) : ''}
               </h2>
             </div>
             {renderContent()}

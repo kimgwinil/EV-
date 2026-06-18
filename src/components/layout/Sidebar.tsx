@@ -68,7 +68,7 @@ export function Sidebar({ curriculum, activeSessionId, onSelectSession }: Sideba
                         {typeIcons[session.type]}
                      </div>
                      <div className="flex-1 overflow-hidden flex items-center justify-between">
-                       <span className="block truncate text-[10px] leading-tight flex-1">{translateSessionTitle(session.title, language)}</span>
+                       <span className="block truncate text-[10px] leading-tight flex-1">{translateContent(translateSessionTitle(session.title, language), language)}</span>
                        <span className={`text-[8px] font-mono shrink-0 ml-2 px-1 py-0.5 rounded ${isActive ? 'bg-blue-900/50 text-blue-300' : 'bg-slate-800 text-slate-400'}`}>D{session.day} {isActive ? typeLabels[session.type] : ''}</span>
                      </div>
                    </button>

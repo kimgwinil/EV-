@@ -490,6 +490,30 @@ body {
   background-size: 100% 100%, 100% 100%, 100% 100%, 100% 34px;
 }
 
+.ev-hover-info-card {
+  background: rgba(248, 250, 252, 0.96) !important;
+  border-color: rgba(37, 99, 235, 0.65) !important;
+  color: #0f172a !important;
+  box-shadow: 0 18px 36px rgba(15, 23, 42, 0.28), inset 0 0 0 1px rgba(255,255,255,0.72) !important;
+  backdrop-filter: blur(8px);
+}
+
+.ev-hover-info-card * {
+  color: #0f172a !important;
+}
+
+.ev-hover-info-card .font-mono {
+  background: rgba(219, 234, 254, 0.95) !important;
+  border: 1px solid rgba(37, 99, 235, 0.28);
+  border-radius: 6px;
+  color: #0f172a !important;
+}
+
+.ev-hover-info-card .leading-snug {
+  color: #1e293b !important;
+  font-weight: 650;
+}
+
 .blueprint-floor::before,
 .blueprint-floor::after {
   content: "";

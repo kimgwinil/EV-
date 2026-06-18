@@ -486,9 +486,9 @@ function MetricCard({ icon, label, value, tone }: { icon: React.ReactNode; label
 
 function StatusTile({ icon, label, value }: { icon?: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="rounded border border-slate-800 bg-slate-900 p-2">
-      <div className="mb-1 flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest text-slate-500">{icon}{label}</div>
-      <div className="font-mono text-xs font-bold text-slate-200">{value}</div>
+    <div className="rounded border border-slate-300 bg-white p-3 shadow-sm">
+      <div className="mb-1 flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-slate-700">{icon}{label}</div>
+      <div className="font-mono text-sm font-black text-slate-950">{value}</div>
     </div>
   );
 }

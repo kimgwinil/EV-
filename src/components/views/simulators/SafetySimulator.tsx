@@ -296,10 +296,10 @@ export function SafetyProcedureSimulator() {
 
 function SafetyMetric({ icon, label, value, note, danger }: { icon: React.ReactNode; label: string; value: string; note: string; danger?: boolean }) {
   return (
-    <div className={`rounded-lg border p-3 ${danger ? 'border-red-900/50 bg-red-950/20' : 'border-slate-800 bg-slate-900'}`}>
-      <div className={`mb-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest ${danger ? 'text-red-400' : 'text-slate-500'}`}>{icon}{label}</div>
-      <div className="font-mono text-xl font-bold text-white">{value}</div>
-      <div className="mt-1 text-[10px] text-slate-500">{note}</div>
+    <div className={`rounded-lg border p-4 shadow-sm ${danger ? 'border-red-300 bg-red-50 text-red-950' : 'border-slate-300 bg-white text-slate-950'}`}>
+      <div className={`mb-2 flex items-center gap-2 text-xs font-black uppercase tracking-widest ${danger ? 'text-red-700' : 'text-slate-700'}`}>{icon}{label}</div>
+      <div className={`font-mono text-2xl font-black ${danger ? 'text-red-950' : 'text-slate-950'}`}>{value}</div>
+      <div className={`mt-1 text-xs font-semibold ${danger ? 'text-red-700' : 'text-slate-700'}`}>{note}</div>
     </div>
   );
 }

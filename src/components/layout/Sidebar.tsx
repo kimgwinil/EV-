@@ -36,18 +36,18 @@ export function Sidebar({ curriculum, activeSessionId, onSelectSession }: Sideba
   };
 
   return (
-    <nav className="w-56 border-r border-slate-800 bg-slate-900/30 flex flex-col shrink-0 h-full overflow-hidden hide-scrollbar">
-      <div className="p-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest shrink-0 border-b border-slate-800/50 bg-slate-900/50">{t(language, 'currentDirectory')}</div>
-      <div className="flex-1 overflow-y-auto space-y-1 p-2">
+    <nav className="w-[500px] border-r border-slate-800 bg-slate-900/30 flex flex-col shrink-0 h-full overflow-hidden hide-scrollbar">
+      <div className="p-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-widest shrink-0 border-b border-slate-800/50 bg-slate-900/50 whitespace-nowrap">{t(language, 'currentDirectory')}</div>
+      <div className="flex-1 overflow-y-auto space-y-1 p-3">
         {curriculum.weeks.map((week) => (
           <div key={week.weekNumber} className="mb-2">
             <button 
               onClick={() => toggleWeek(week.weekNumber)}
-              className="w-full text-left p-2 rounded bg-slate-800/20 hover:bg-slate-800/50 flex items-center justify-between text-xs font-medium text-slate-300 transition-colors"
+              className="w-full text-left p-3 rounded bg-slate-800/20 hover:bg-slate-800/50 flex items-center justify-between text-sm font-medium text-slate-300 transition-colors"
             >
-              <div className="flex flex-col gap-0.5">
-                <span className="text-[9px] font-bold text-blue-500 tracking-wider">WEEK {week.weekNumber}</span>
-                <span className="line-clamp-1 text-[11px] text-slate-300">{translateTheme(week.theme, language)}</span>
+              <div className="min-w-0 flex flex-col gap-1">
+                <span className="text-[11px] font-bold text-blue-500 tracking-wider whitespace-nowrap">WEEK {week.weekNumber}</span>
+                <span className="block truncate text-[13px] text-slate-300 whitespace-nowrap">{translateTheme(week.theme, language)}</span>
               </div>
               {expandedWeeks.includes(week.weekNumber) ? <ChevronDown size={14} className="text-slate-500 shrink-0"/> : <ChevronRight size={14} className="text-slate-500 shrink-0"/>}
             </button>
@@ -60,16 +60,16 @@ export function Sidebar({ curriculum, activeSessionId, onSelectSession }: Sideba
                    <button
                      key={session.id}
                      onClick={() => onSelectSession(session.id)}
-                     className={`w-full text-left p-1.5 px-2 rounded flex items-center gap-2 transition-colors
+                     className={`w-full text-left p-2.5 px-3 rounded flex items-center gap-2 transition-colors
                        ${isActive ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30 font-bold' : 'text-slate-500 hover:bg-slate-800/80 hover:text-slate-300 border border-transparent'}
                      `}
                    >
                      <div className={`mt-0 shrink-0 ${isActive ? 'opacity-100' : 'opacity-70'}`}>
                         {typeIcons[session.type]}
                      </div>
-                     <div className="flex-1 overflow-hidden flex items-center justify-between">
-                       <span className="block truncate text-[10px] leading-tight flex-1">{translateContent(translateSessionTitle(session.title, language), language)}</span>
-                       <span className={`text-[8px] font-mono shrink-0 ml-2 px-1 py-0.5 rounded ${isActive ? 'bg-blue-900/50 text-blue-300' : 'bg-slate-800 text-slate-400'}`}>D{session.day} {isActive ? typeLabels[session.type] : ''}</span>
+                     <div className="min-w-0 flex-1 overflow-hidden flex items-center justify-between">
+                       <span className="block min-w-0 truncate text-[12px] leading-tight flex-1 whitespace-nowrap">{translateContent(translateSessionTitle(session.title, language), language)}</span>
+                       <span className={`text-[10px] font-mono shrink-0 ml-2 px-1.5 py-0.5 rounded whitespace-nowrap ${isActive ? 'bg-blue-900/50 text-blue-300' : 'bg-slate-800 text-slate-400'}`}>D{session.day} {isActive ? typeLabels[session.type] : ''}</span>
                      </div>
                    </button>
                  )})}
@@ -81,7 +81,7 @@ export function Sidebar({ curriculum, activeSessionId, onSelectSession }: Sideba
       <div className="p-4 border-t border-slate-800 shrink-0 bg-slate-900/50">
         <button 
            onClick={() => setIsManualOpen(true)}
-           className="w-full py-2 px-4 bg-amber-600/90 hover:bg-amber-500 text-amber-50 font-bold text-[10px] rounded uppercase tracking-widest shadow-sm transition-colors border border-amber-500 flex justify-center items-center gap-2"
+           className="w-full py-2.5 px-4 bg-amber-600/90 hover:bg-amber-500 text-amber-50 font-bold text-xs rounded uppercase tracking-widest shadow-sm transition-colors border border-amber-500 flex justify-center items-center gap-2 whitespace-nowrap"
         >
            <ShieldAlert size={14}/> {t(language, 'viewSafetyManual')}
         </button>

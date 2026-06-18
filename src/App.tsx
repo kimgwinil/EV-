@@ -9,7 +9,7 @@ import { Sidebar } from './components/layout/Sidebar';
 import { LearningView } from './components/views/LearningView';
 import { EvaluationView } from './components/views/EvaluationView';
 import { useVehicleStore } from './store/vehicleStore';
-import { Power, FileWarning } from 'lucide-react';
+import { Power } from 'lucide-react';
 import { languageOptions, t, translateContent, translateSessionTitle, useLanguageStore } from './i18n';
 
 export default function App() {
@@ -50,21 +50,21 @@ export default function App() {
   };
 
   return (
-    <div className="flex h-screen bg-slate-950 text-slate-200 overflow-hidden font-sans">
+    <div className="flex h-screen bg-slate-100 text-slate-800 overflow-hidden font-sans">
       <Sidebar 
         curriculum={curriculumData} 
         activeSessionId={activeSessionId}
         onSelectSession={setActiveSessionId}
       />
       
-      <main className="flex-1 flex flex-col overflow-hidden bg-slate-950">
-        <header className="h-14 border-b border-slate-800 flex items-center justify-between px-6 bg-slate-900/50 shrink-0">
-          <div className="flex items-center gap-4">
+      <main className="flex-1 flex flex-col overflow-hidden bg-slate-100">
+        <header className="h-16 border-b border-slate-800 flex items-center justify-between px-6 bg-slate-900/50 shrink-0">
+          <div className="min-w-0 flex items-center gap-4">
              <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center font-bold text-white">EV</div>
-             <h1 className="text-lg font-semibold tracking-tight text-slate-200">{t(language, 'appTitle')} <span className="text-slate-500 font-normal ml-2 text-sm uppercase">{t(language, 'edition')}</span></h1>
+             <h1 className="truncate whitespace-nowrap text-xl font-semibold tracking-tight text-slate-200">{t(language, 'appTitle')} <span className="text-slate-500 font-normal ml-2 text-sm uppercase">{t(language, 'edition')}</span></h1>
           </div>
-          <div className="flex items-center gap-6">
-             <label className="flex items-center gap-2 rounded border border-slate-700 bg-slate-800 px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+          <div className="flex shrink-0 items-center gap-5">
+             <label className="flex items-center gap-2 rounded border border-slate-700 bg-slate-800 px-2 py-1 text-xs font-bold uppercase tracking-widest text-slate-400 whitespace-nowrap">
                <span>{t(language, 'language')}</span>
                <select
                  value={language}
@@ -94,20 +94,20 @@ export default function App() {
                 </button>
              </div>
              
-             <div className="flex flex-col items-end border-l border-slate-800 pl-6">
-               <span className="text-xs text-slate-400">{t(language, 'currentCourse')}: [{t(language, 'courseTarget')}]</span>
+             <div className="flex flex-col items-end border-l border-slate-800 pl-5 whitespace-nowrap">
+               <span className="text-sm text-slate-400">{t(language, 'currentCourse')}: [{t(language, 'courseTarget')}]</span>
                <span className="text-xs font-mono text-blue-400">{t(language, 'weeksSummary')}</span>
              </div>
              <div className="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs text-slate-300 font-bold tracking-wider">SK</div>
           </div>
         </header>
 
-        <div className="flex-1 flex flex-col overflow-y-auto p-4 gap-4">
+        <div className="flex-1 flex flex-col overflow-y-auto p-5 gap-4">
             <div className="mb-2 shrink-0">
-              <div className="text-[10px] font-bold text-blue-500 mb-1 tracking-wider uppercase font-mono">
+              <div className="text-xs font-bold text-blue-500 mb-1 tracking-wider uppercase font-mono whitespace-nowrap">
                   {session ? `DAY ${session.day} · ${session.type.toUpperCase()}` : 'LOADING'}
               </div>
-              <h2 className="text-xl font-bold text-white tracking-tight">
+              <h2 className="truncate whitespace-nowrap text-2xl font-bold text-white tracking-tight">
                 {session ? translateContent(translateSessionTitle(session.title, language), language) : ''}
               </h2>
             </div>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Battery, Zap, Cpu, ShieldAlert, Power, Settings } from 'lucide-react';
 import { useVehicleStore } from '../../store/vehicleStore';
-import { t, useLanguageStore } from '../../i18n';
+import { t, translateContent, useLanguageStore } from '../../i18n';
 
 const COMPONENTS = [
   { id: 'battery', name: '고전압 배터리 팩', icon: Battery, desc: '차량 하부 전체에 위치하며 300V~800V의 고전압을 저장하는 주요 에너지원.', color: 'emerald' },
@@ -87,10 +87,10 @@ export function EvExplorer({ className = '', defaultHighlight }: Props) {
             <div className="absolute bottom-0 left-0 right-0 h-12 bg-slate-900/70" />
             <div className={`ev-hover-info-card absolute bottom-3 left-1/2 z-40 w-[340px] -translate-x-1/2 rounded-lg border p-3 shadow-[0_18px_38px_rgba(0,0,0,0.42)] backdrop-blur transition-all duration-200 ${getToneClasses(activeComponent.color)}`}>
                <div className="flex items-center justify-between gap-3">
-                  <div className="text-[11px] font-black uppercase tracking-widest">{activeComponent.name}</div>
+                  <div className="text-[11px] font-black uppercase tracking-widest">{translateContent(activeComponent.name, language)}</div>
                   <div className="rounded bg-slate-950/70 px-2 py-0.5 font-mono text-[10px] font-bold">{getLiveStatText(activeComponent.id)}</div>
                </div>
-               <div className="mt-1 text-[10px] leading-snug text-slate-300">{activeComponent.desc}</div>
+               <div className="mt-1 text-[10px] leading-snug text-slate-300">{translateContent(activeComponent.desc, language)}</div>
             </div>
 
             <div className="absolute inset-x-0 top-5 z-10 flex justify-center">
@@ -188,23 +188,23 @@ export function EvExplorer({ className = '', defaultHighlight }: Props) {
                     key={comp.id} 
                     onClick={() => setActiveId(comp.id)}
                     onMouseEnter={() => setActiveId(comp.id)}
-                    title={comp.desc}
+                    title={translateContent(comp.desc, language)}
                     className={`min-h-[36px] p-2.5 rounded border transition-all cursor-pointer text-left ${isActive ? 'bg-slate-800 border-slate-600 shadow-sm' : 'bg-slate-950/50 border-slate-800/50 hover:bg-slate-900 hover:border-slate-700'}`}
                   >
                      <div className="flex items-center gap-2">
                         <Icon size={12} className={colorClasses} />
-                        <span className={`text-[11px] font-bold uppercase tracking-wider flex-1 ${isActive ? 'text-slate-200' : 'text-slate-400'}`}>{comp.name}</span>
+                        <span className={`text-[11px] font-bold uppercase tracking-wider flex-1 ${isActive ? 'text-slate-200' : 'text-slate-400'}`}>{translateContent(comp.name, language)}</span>
                         {isActive && getLiveStats(comp.id)}
                      </div>
-                     {isActive && <div className="mt-1 text-[10px] leading-snug text-slate-400">{comp.desc}</div>}
+                     {isActive && <div className="mt-1 text-[10px] leading-snug text-slate-400">{translateContent(comp.desc, language)}</div>}
                   </button>
                )
             })}
             </div>
             <div className="mt-3 rounded border border-slate-800 bg-slate-950 p-2">
               <div className="text-[9px] font-bold uppercase tracking-widest text-slate-500">{t(language, 'currentSelection')}</div>
-              <div className="mt-1 text-xs font-bold text-slate-200">{activeComponent.name}</div>
-              <div className="mt-1 text-[10px] leading-snug text-slate-500">{activeComponent.desc}</div>
+              <div className="mt-1 text-xs font-bold text-slate-200">{translateContent(activeComponent.name, language)}</div>
+              <div className="mt-1 text-[10px] leading-snug text-slate-500">{translateContent(activeComponent.desc, language)}</div>
             </div>
          </div>
        </div>

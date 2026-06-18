@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts';
 import { Power, AlertTriangle, Info, Settings2 } from 'lucide-react';
 import { useVehicleStore, EvCell } from '../../../store/vehicleStore';
+import { translateContent, useLanguageStore } from '../../../i18n';
 
 
 export function BmsSimulator() {
+  const language = useLanguageStore(state => state.language);
   const { 
       cells, 
       isBalancing, 
@@ -44,15 +46,15 @@ export function BmsSimulator() {
              <h3 className="font-bold text-slate-500 uppercase tracking-widest text-[10px] mb-2 border-b border-slate-800 pb-2">Scenario Select</h3>
              <label className="flex items-center gap-2 cursor-pointer text-slate-300 hover:text-slate-200">
                  <input type="radio" checked={localFault==='none'} onChange={()=>handleScenarioChange('none')} className="text-blue-500 bg-slate-900 border-slate-700 focus:ring-blue-500 focus:ring-offset-slate-950 accent-blue-500" /> 
-                 <span>정상 상태</span>
+                 <span>{translateContent('정상 상태', language)}</span>
              </label>
              <label className="flex items-center gap-2 cursor-pointer text-slate-300 hover:text-slate-200">
                  <input type="radio" checked={localFault==='cell_degradation'} onChange={()=>handleScenarioChange('cell_degradation')} className="text-blue-500 bg-slate-900 border-slate-700 focus:ring-blue-500 focus:ring-offset-slate-950 accent-blue-500" /> 
-                 <span>셀 편차 발생 (열화)</span>
+                 <span>{translateContent('셀 편차 발생 (열화)', language)}</span>
              </label>
              <label className="flex items-center gap-2 cursor-pointer text-red-400 hover:text-red-300">
                  <input type="radio" checked={localFault==='temp_warning'} onChange={()=>handleScenarioChange('temp_warning')} className="text-blue-500 bg-slate-900 border-slate-700 focus:ring-blue-500 focus:ring-offset-slate-950 accent-blue-500" /> 
-                 <span>고온 경고 발생</span>
+                 <span>{translateContent('고온 경고 발생', language)}</span>
              </label>
          </div>
          <div className="col-span-3 p-3 bg-slate-950 rounded border border-slate-800 flex flex-col justify-center items-center gap-3">
@@ -61,17 +63,17 @@ export function BmsSimulator() {
                     onClick={startCharge}
                     className="bg-blue-900/30 hover:bg-blue-900/50 text-blue-400 border border-blue-500/50 font-bold py-1.5 px-4 rounded text-xs transition-colors uppercase tracking-wide"
                  >
-                    전체 충전 (+5%)
+                    {translateContent('전체 충전 (+5%)', language)}
                  </button>
                  <button 
                     onClick={toggleBalancing}
                     className={`${isBalancing ? 'bg-amber-900/30 hover:bg-amber-900/50 text-amber-500 border-amber-500/50' : 'bg-green-900/30 hover:bg-green-900/50 text-green-500 border-green-500/50'} border font-bold py-1.5 px-4 rounded text-xs transition-colors flex items-center gap-2 uppercase tracking-wide`}
                  >
-                    <Power size={14}/> {isBalancing ? '밸런싱 중지' : '수동(Passive) 밸런싱 시작'}
+                    <Power size={14}/> {translateContent(isBalancing ? '밸런싱 중지' : '수동(Passive) 밸런싱 시작', language)}
                  </button>
              </div>
              <p className="text-[10px] text-slate-500 max-w-lg text-center">
-                패시브 밸런싱은 전압이 가장 높은 셀의 에너지를 저항을 통해 열로 소비시켜 낮은 셀과 전압을 맞춥니다. 이 과정에서 열이 발생합니다. 실제 데이터 베이스를 통해 동기화됩니다.
+                {translateContent('패시브 밸런싱은 전압이 가장 높은 셀의 에너지를 저항을 통해 열로 소비시켜 낮은 셀과 전압을 맞춥니다. 이 과정에서 열이 발생합니다. 실제 데이터 베이스를 통해 동기화됩니다.', language)}
              </p>
          </div>
       </div>

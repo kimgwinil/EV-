@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ShieldAlert, CheckCircle2, XCircle, AlertTriangle, RefreshCw, Gauge, Battery, Zap, Wrench } from 'lucide-react';
 import { useVehicleStore } from '../../../store/vehicleStore';
-import { t, useLanguageStore } from '../../../i18n';
+import { t, translateContent, useLanguageStore } from '../../../i18n';
 
 const STEPS = [
   { id: 'ppe', label: '개인보호장구(PPE) 점검 및 착용', desc: '절연장갑(핀홀 검사), 절연복, 절연화 착용 및 작업구역 통제', risk: 'high' },
@@ -109,7 +109,7 @@ export function SafetyProcedureSimulator() {
       <div className="bg-red-950 border-b border-red-900 p-3 text-red-200 flex justify-between items-center">
          <div className="flex items-center gap-2">
             <ShieldAlert size={16} className="text-red-500"/>
-            <h2 className="font-bold text-sm tracking-widest uppercase">고전압 안전 차단 절차 (LOTO) 시뮬레이션</h2>
+            <h2 className="font-bold text-sm tracking-widest uppercase">{translateContent('고전압 안전 차단 절차 (LOTO) 시뮬레이션', language)}</h2>
          </div>
          <div className="text-[10px] font-mono bg-red-900/50 px-2 py-0.5 rounded border border-red-500/30 text-red-400">HIGH RISK ACTIVITY</div>
       </div>
@@ -131,10 +131,10 @@ export function SafetyProcedureSimulator() {
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <div className="text-[10px] font-bold uppercase tracking-widest text-red-400">Safety Scenario</div>
-                  <h3 className="mt-1 text-base font-bold text-white">고전압 차량 안전 차단 가상실습</h3>
+                  <h3 className="mt-1 text-base font-bold text-white">{translateContent('고전압 차량 안전 차단 가상실습', language)}</h3>
                 </div>
                 <div className={`rounded border px-3 py-1 text-[10px] font-bold uppercase tracking-widest ${completed('plug') ? 'border-emerald-600/40 bg-emerald-950/30 text-emerald-300' : 'border-red-600/40 bg-red-950/30 text-red-300'}`}>
-                  {stageLabel}
+                  {translateContent(stageLabel, language)}
                 </div>
               </div>
 
@@ -142,10 +142,10 @@ export function SafetyProcedureSimulator() {
                 <div className="relative">
                   <div className="ev-hover-info-card absolute left-1/2 top-[252px] z-40 w-[300px] -translate-x-1/2 rounded-lg border border-blue-500/40 bg-blue-950/30 p-2.5 text-blue-100 shadow-[0_18px_38px_rgba(0,0,0,0.42)] backdrop-blur">
                     <div className="flex items-center justify-between gap-2">
-                      <div className="text-[10px] font-black uppercase tracking-widest">{selectedPart.name}</div>
+                      <div className="text-[10px] font-black uppercase tracking-widest">{translateContent(selectedPart.name, language)}</div>
                       <div className="rounded bg-slate-950/70 px-2 py-0.5 font-mono text-[10px] font-bold">{selectedPartValue}</div>
                     </div>
-                    <div className="mt-1 text-[9px] leading-snug text-slate-300">{selectedPart.desc}</div>
+                    <div className="mt-1 text-[9px] leading-snug text-slate-300">{translateContent(selectedPart.desc, language)}</div>
                   </div>
                   <div className="topdown-ev safety-topdown-ev">
                     <div className="topdown-ev-texture" />
@@ -179,24 +179,24 @@ export function SafetyProcedureSimulator() {
                     onClick={() => setSelectedPartId(part.id)}
                     className={`w-full rounded border p-2 text-left transition-colors ${isActive ? 'border-blue-500/40 bg-blue-950/25' : 'border-slate-800 bg-slate-950/60 hover:border-slate-700'}`}
                   >
-                    <div className={`text-[11px] font-bold ${isActive ? 'text-blue-300' : 'text-slate-300'}`}>{part.name}</div>
-                    {isActive && <div className="mt-1 text-[10px] leading-snug text-slate-400">{part.desc}</div>}
+                    <div className={`text-[11px] font-bold ${isActive ? 'text-blue-300' : 'text-slate-300'}`}>{translateContent(part.name, language)}</div>
+                    {isActive && <div className="mt-1 text-[10px] leading-snug text-slate-400">{translateContent(part.desc, language)}</div>}
                   </button>
                 );
               })}
             </div>
             <div className="mt-3 rounded border border-slate-800 bg-slate-950 p-2">
               <div className="text-[9px] font-bold uppercase tracking-widest text-slate-500">{t(language, 'currentSelection')}</div>
-              <div className="mt-1 text-xs font-bold text-slate-200">{selectedPart.name}</div>
-              <div className="mt-1 text-[10px] leading-snug text-slate-500">{selectedPart.desc}</div>
+              <div className="mt-1 text-xs font-bold text-slate-200">{translateContent(selectedPart.name, language)}</div>
+              <div className="mt-1 text-[10px] leading-snug text-slate-500">{translateContent(selectedPart.desc, language)}</div>
             </div>
           </div>
 
           <div className="grid gap-3 md:grid-cols-4" style={{ gridColumn: '1 / -1' }}>
-            <SafetyMetric icon={<Gauge size={14} />} label="차량 속도" value={`${vehicleSpeed.toFixed(0)} km/h`} note={vehicleSpeed > 0 ? 'IG OFF 전: 바퀴 회전 중' : '정지 확인'} />
-            <SafetyMetric icon={<Zap size={14} />} label="고전압 추정" value={`${safetyVoltage.toFixed(0)} V`} note={completed('plug') ? 'MSD 탈거 후 0V 검전 단계' : '접촉 금지'} danger={!completed('plug')} />
-            <SafetyMetric icon={<Battery size={14} />} label="배터리 SOC" value={`${packSoc.toFixed(1)}%`} note="에너지 잔류 가능성 전제" />
-            <SafetyMetric icon={<Wrench size={14} />} label="작업 허가" value={gameState === 'success' ? '허가' : '금지'} note={gameState === 'success' ? '0V 확인 후 제한적 작업' : '절차 완료 전 접촉 금지'} danger={gameState !== 'success'} />
+            <SafetyMetric icon={<Gauge size={14} />} label={translateContent('차량 속도', language)} value={`${vehicleSpeed.toFixed(0)} km/h`} note={translateContent(vehicleSpeed > 0 ? 'IG OFF 전: 바퀴 회전 중' : '정지 확인', language)} />
+            <SafetyMetric icon={<Zap size={14} />} label={translateContent('고전압 추정', language)} value={`${safetyVoltage.toFixed(0)} V`} note={translateContent(completed('plug') ? 'MSD 탈거 후 0V 검전 단계' : '접촉 금지', language)} danger={!completed('plug')} />
+            <SafetyMetric icon={<Battery size={14} />} label={translateContent('배터리 SOC', language)} value={`${packSoc.toFixed(1)}%`} note={translateContent('에너지 잔류 가능성 전제', language)} />
+            <SafetyMetric icon={<Wrench size={14} />} label={translateContent('작업 허가', language)} value={translateContent(gameState === 'success' ? '허가' : '금지', language)} note={translateContent(gameState === 'success' ? '0V 확인 후 제한적 작업' : '절차 완료 전 접촉 금지', language)} danger={gameState !== 'success'} />
           </div>
         </div>
 
@@ -207,8 +207,8 @@ export function SafetyProcedureSimulator() {
                 <span className="text-[9px] font-mono text-slate-500">STEP {idx + 1}</span>
                 {completed(step.id) && <CheckCircle2 size={12} className="text-emerald-400" />}
               </div>
-              <div className="text-[11px] font-bold text-slate-200">{step.label}</div>
-              <div className="mt-1 text-[10px] leading-snug text-slate-500">왜: {step.desc}</div>
+              <div className="text-[11px] font-bold text-slate-200">{translateContent(step.label, language)}</div>
+              <div className="mt-1 text-[10px] leading-snug text-slate-500">{translateContent('왜', language)}: {translateContent(step.desc, language)}</div>
             </div>
           ))}
         </div>
@@ -217,7 +217,7 @@ export function SafetyProcedureSimulator() {
       <div className="p-4 grid grid-cols-2 gap-4 bg-slate-950">
          {/* Action Panel */}
          <div className="space-y-2">
-             <div className="text-[10px] font-bold text-slate-500 mb-2 uppercase tracking-widest">수행할 작업을 선택하세요</div>
+             <div className="text-[10px] font-bold text-slate-500 mb-2 uppercase tracking-widest">{translateContent('수행할 작업을 선택하세요', language)}</div>
              {[STEPS[1], STEPS[4], STEPS[0], STEPS[3], STEPS[2]].map((step) => {
                  const isCompleted = history.some(h => h.id === step.id && h.success);
                  const isFailed = history.some(h => h.id === step.id && !h.success);
@@ -239,8 +239,8 @@ export function SafetyProcedureSimulator() {
                              <div className="w-4 h-4 rounded bg-slate-800 border border-slate-600"></div>}
                          </div>
                          <div>
-                             <div className={`font-bold ${isCompleted ? 'text-slate-500' : isFailed ? 'text-red-400' : 'text-slate-300'}`}>{step.label}</div>
-                             <div className="text-[10px] text-slate-500 mt-1 leading-snug">{step.desc}</div>
+                             <div className={`font-bold ${isCompleted ? 'text-slate-500' : isFailed ? 'text-red-400' : 'text-slate-300'}`}>{translateContent(step.label, language)}</div>
+                             <div className="text-[10px] text-slate-500 mt-1 leading-snug">{translateContent(step.desc, language)}</div>
                          </div>
                      </button>
                  )
@@ -249,10 +249,10 @@ export function SafetyProcedureSimulator() {
 
          {/* Status & Feedback Panel */}
          <div className="bg-slate-900 rounded border border-slate-800 p-4 flex flex-col">
-            <h3 className="text-[10px] uppercase tracking-widest font-bold text-slate-500 mb-3 border-b border-slate-800 pb-2">작업 진행 로그</h3>
+            <h3 className="text-[10px] uppercase tracking-widest font-bold text-slate-500 mb-3 border-b border-slate-800 pb-2">{translateContent('작업 진행 로그', language)}</h3>
             
             <div className="flex-1 space-y-2 mb-4">
-                {history.length === 0 && <div className="text-slate-600 text-xs text-center py-6">아직 수행한 작업이 없습니다.</div>}
+                {history.length === 0 && <div className="text-slate-600 text-xs text-center py-6">{translateContent('아직 수행한 작업이 없습니다.', language)}</div>}
                 {history.map((h, i) => {
                     const stepInfo = STEPS.find(s => s.id === h.id)!;
                     return (
@@ -260,7 +260,7 @@ export function SafetyProcedureSimulator() {
                             h.success ? 'bg-slate-950 border-slate-800 text-slate-400' : 'bg-red-950/30 border-red-900/50 text-red-400 font-bold'
                         }`}>
                             {h.success ? <CheckCircle2 size={14} className="text-emerald-500"/> : <XCircle size={14}/>}
-                            <span className="font-mono text-[10px] opacity-50">{(i+1).toString().padStart(2,'0')}</span> {stepInfo.label}
+                            <span className="font-mono text-[10px] opacity-50">{(i+1).toString().padStart(2,'0')}</span> {translateContent(stepInfo.label, language)}
                         </div>
                     )
                 })}
@@ -269,9 +269,9 @@ export function SafetyProcedureSimulator() {
             {gameState === 'failed' && (
                 <div className="bg-red-950/30 border border-red-500/30 rounded p-3 text-left">
                     <div className="font-bold text-red-500 flex items-center gap-2 mb-1.5 text-xs uppercase tracking-widest"><AlertTriangle size={14}/> FATAL SAFETY ERROR</div>
-                    <p className="text-red-300/80 text-[11px] mb-3">{failReason}</p>
+                    <p className="text-red-300/80 text-[11px] mb-3">{translateContent(failReason || '', language)}</p>
                     <button onClick={reset} className="flex items-center justify-center gap-2 w-full text-xs font-bold bg-slate-950 text-red-500 py-2 rounded hover:bg-red-950/50 border border-red-900/50 transition-colors uppercase tracking-wider">
-                        <RefreshCw size={12}/> 시뮬레이터 초기화
+                        <RefreshCw size={12}/> {translateContent('시뮬레이터 초기화', language)}
                     </button>
                 </div>
             )}
@@ -281,10 +281,10 @@ export function SafetyProcedureSimulator() {
                     <div className="w-12 h-12 bg-emerald-900/50 rounded-full border transform shadow-[0_0_15px_rgba(16,185,129,0.3)] border-emerald-500/50 flex items-center justify-center text-emerald-400 mx-auto mb-2">
                         <CheckCircle2 size={24}/>
                     </div>
-                    <div className="font-bold text-emerald-400 text-sm mb-1 uppercase tracking-widest">절차 완벽 수행</div>
-                    <p className="text-emerald-500/70 text-[10px] mb-3">안전하게 고전압 차단 및 검전을 완료했습니다.</p>
+                    <div className="font-bold text-emerald-400 text-sm mb-1 uppercase tracking-widest">{translateContent('절차 완벽 수행', language)}</div>
+                    <p className="text-emerald-500/70 text-[10px] mb-3">{translateContent('안전하게 고전압 차단 및 검전을 완료했습니다.', language)}</p>
                      <button onClick={reset} className="text-xs font-bold bg-slate-950 text-emerald-500 w-full py-2 rounded hover:bg-emerald-950/50 border border-emerald-900/50 transition-colors inline-flex justify-center items-center gap-2 uppercase tracking-wider">
-                        <RefreshCw size={12}/> 다시 연습하기
+                        <RefreshCw size={12}/> {translateContent('다시 연습하기', language)}
                     </button>
                 </div>
             )}

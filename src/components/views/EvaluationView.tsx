@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { Session, EvaluationData } from '../../types';
 import { CheckCircle, HelpCircle, Target } from 'lucide-react';
+import { t, translateContent, useLanguageStore } from '../../i18n';
 
 export function EvaluationView({ session }: { session: Session }) {
   const data = session.evaluationData;
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, number | string>>({});
   const [submitted, setSubmitted] = useState(false);
+  const language = useLanguageStore(state => state.language);
 
-  if (!data) return <div className="p-8 text-center text-slate-500">평가 문항이 준비 중입니다.</div>;
+  if (!data) return <div className="p-8 text-center text-slate-500">{t(language, 'evaluationPreparing')}</div>;
 
   const handleSelect = (qId: string, value: number | string) => {
     if(!submitted) {
@@ -34,12 +36,12 @@ export function EvaluationView({ session }: { session: Session }) {
       <div className="bg-slate-900 p-4 rounded-lg border border-slate-800 flex items-start justify-between">
          <div>
              <h2 className="text-sm font-bold flex items-center gap-2 mb-1 text-emerald-500 tracking-widest uppercase">
-               <Target size={16} /> {data.type === 'formative' ? '형성평가' : data.type === 'cumulative' ? '누적평가' : '캡스톤 평가'}
+               <Target size={16} /> {data.type === 'formative' ? t(language, 'formativeAssessment') : data.type === 'cumulative' ? t(language, 'cumulativeAssessment') : t(language, 'capstoneAssessment')}
              </h2>
-             <p className="text-xs text-slate-400">학습 목표 달성 여부 확인. 통과 기준 충족 시 다음 모듈 이수.</p>
+             <p className="text-xs text-slate-400">{t(language, 'evaluationIntro')}</p>
              <div className="mt-3 inline-flex flex-col bg-slate-950 p-2 rounded border border-slate-800 items-start">
                 <span className="text-[10px] font-mono text-slate-500 mb-0.5 tracking-wider">REQ. SCORE & FALLBACK</span>
-                <span className="text-xs text-slate-300 font-medium">{data.passCriteria}</span>
+                <span className="text-xs text-slate-300 font-medium">{translateContent(data.passCriteria, language)}</span>
              </div>
          </div>
          {submitted && (
@@ -74,7 +76,7 @@ export function EvaluationView({ session }: { session: Session }) {
                         </div>
                         <div className="flex-1">
                             <div className="flex justify-between items-start mb-2">
-                                <h3 className="text-sm font-medium text-slate-200 leading-relaxed">{q.question}</h3>
+                                <h3 className="text-sm font-medium text-slate-200 leading-relaxed">{translateContent(q.question, language)}</h3>
                                 <span className="text-[10px] font-mono text-slate-500 bg-slate-950 px-1.5 py-0.5 rounded border border-slate-800 shrink-0 ml-4">{q.points} PTS</span>
                             </div>
                             
@@ -97,9 +99,9 @@ export function EvaluationView({ session }: { session: Session }) {
                                         />
                                         <span className={`text-xs ${
                                             selectedAnswers[q.id] === optIdx ? 'text-slate-200' : 'text-slate-400'
-                                        }`}>{opt}</span>
+                                        }`}>{translateContent(opt, language)}</span>
                                         {submitted && q.answer === optIdx && (
-                                             <span className="ml-auto text-[9px] font-bold text-emerald-400 bg-emerald-900/30 border border-emerald-500/30 px-1.5 py-0.5 rounded uppercase">정답</span>
+                                             <span className="ml-auto text-[9px] font-bold text-emerald-400 bg-emerald-900/30 border border-emerald-500/30 px-1.5 py-0.5 rounded uppercase">{t(language, 'correct')}</span>
                                         )}
                                     </label>
                                 ))}
@@ -109,9 +111,9 @@ export function EvaluationView({ session }: { session: Session }) {
                                 <div className={`mt-4 pt-3 border-t border-slate-800`}>
                                     <div className="text-[10px] text-slate-500">
                                         <div className="font-bold flex items-center gap-1.5 mb-1.5 text-slate-400 uppercase">
-                                            <HelpCircle size={12}/> 해설
+                                            <HelpCircle size={12}/> {t(language, 'explanation')}
                                         </div>
-                                        <p className="text-slate-400 leading-relaxed text-xs">{q.explanation}</p>
+                                        <p className="text-slate-400 leading-relaxed text-xs">{translateContent(q.explanation, language)}</p>
                                     </div>
                                 </div>
                             )}
@@ -128,7 +130,7 @@ export function EvaluationView({ session }: { session: Session }) {
                 onClick={() => setSubmitted(true)}
                 className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold py-2.5 px-8 rounded shadow-sm transition-all focus:ring-2 focus:ring-blue-500/50 flex items-center gap-2 uppercase tracking-wide"
             >
-                답안 제출 및 채점
+                {t(language, 'submitAndGrade')}
             </button>
         </div>
       )}

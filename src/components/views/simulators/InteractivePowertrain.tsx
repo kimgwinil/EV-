@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useVehicleStore } from '../../../store/vehicleStore';
 import { Activity, Battery, Flame, Gauge, RotateCcw, Route, Thermometer, Zap } from 'lucide-react';
-import { t, translateTheme, useLanguageStore } from '../../../i18n';
+import { Language, t, translateContent, translateTheme, useLanguageStore } from '../../../i18n';
 
 type TelemetryPoint = {
   t: string;
@@ -105,10 +105,10 @@ export function InteractivePowertrain({ title, targetTheme }: { title: string; t
         <div className="flex flex-col gap-1 border-b border-slate-800 bg-slate-950 p-4 md:flex-row md:items-end md:justify-between">
           <div>
             <h2 className="text-sm font-bold text-slate-100">{title}</h2>
-            <p className="mt-1 text-[11px] text-slate-500">{targetTheme ? translateTheme(targetTheme, language) : ''} 이론을 속도, 부하, 온도, 회생제동 변화로 검증하는 주행 시뮬레이터입니다.</p>
+            <p className="mt-1 text-[11px] text-slate-500">{targetTheme ? translateTheme(targetTheme, language) : ''} {translateContent('이론을 속도, 부하, 온도, 회생제동 변화로 검증하는 주행 시뮬레이터입니다.', language)}</p>
           </div>
           <div className={`text-xs font-bold uppercase tracking-widest ${riskState.color}`}>
-            {riskState.label} <span className="ml-2 text-[10px] font-normal text-slate-500">{riskState.detail}</span>
+            {translateContent(riskState.label, language)} <span className="ml-2 text-[10px] font-normal text-slate-500">{translateContent(riskState.detail, language)}</span>
           </div>
         </div>
 
@@ -131,17 +131,17 @@ export function InteractivePowertrain({ title, targetTheme }: { title: string; t
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
                         <div className="text-[10px] font-bold uppercase tracking-widest text-cyan-400">Powertrain Scenario</div>
-                        <h3 className="mt-1 text-base font-bold text-white">구동계 주행 상태 가상실습</h3>
+                        <h3 className="mt-1 text-base font-bold text-white">{translateContent('구동계 주행 상태 가상실습', language)}</h3>
                       </div>
                       <div className={`rounded border px-3 py-1 text-[10px] font-bold uppercase tracking-widest ${riskState.color} border-slate-700 bg-slate-900/70`}>
-                        {riskState.label}
+                        {translateContent(riskState.label, language)}
                       </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-                      <MetricCard icon={<Gauge size={15} />} label="속도" value={`${vehicleSpeed.toFixed(0)} km/h`} tone="text-cyan-300" />
-                      <MetricCard icon={<Zap size={15} />} label="출력" value={`${powerKw.toFixed(1)} kW`} tone="text-amber-300" />
-                      <MetricCard icon={<RotateCcw size={15} />} label="모터" value={`${motorRpm.toFixed(0)} rpm`} tone="text-orange-300" />
+                      <MetricCard icon={<Gauge size={15} />} label={translateContent('속도', language)} value={`${vehicleSpeed.toFixed(0)} km/h`} tone="text-cyan-300" />
+                      <MetricCard icon={<Zap size={15} />} label={translateContent('출력', language)} value={`${powerKw.toFixed(1)} kW`} tone="text-amber-300" />
+                      <MetricCard icon={<RotateCcw size={15} />} label={translateContent('모터', language)} value={`${motorRpm.toFixed(0)} rpm`} tone="text-orange-300" />
                       <MetricCard icon={<Battery size={15} />} label="SOC" value={`${packSoc.toFixed(1)}%`} tone="text-emerald-300" />
                     </div>
 
@@ -149,10 +149,10 @@ export function InteractivePowertrain({ title, targetTheme }: { title: string; t
                       <div className="relative pb-24">
                         <div className="ev-hover-info-card absolute left-1/2 top-[248px] z-40 w-[310px] -translate-x-1/2 rounded-lg border border-cyan-500/40 bg-cyan-950/30 p-2.5 text-cyan-100 shadow-[0_18px_38px_rgba(0,0,0,0.42)] backdrop-blur">
                           <div className="flex items-center justify-between gap-2">
-                            <div className="text-[10px] font-black uppercase tracking-widest">{selectedPart.name}</div>
+                            <div className="text-[10px] font-black uppercase tracking-widest">{translateContent(selectedPart.name, language)}</div>
                             <div className="rounded bg-slate-950/70 px-2 py-0.5 font-mono text-[10px] font-bold">{selectedPartValue}</div>
                           </div>
-                          <div className="mt-1 text-[9px] leading-snug text-slate-300">{selectedPart.desc}</div>
+                          <div className="mt-1 text-[9px] leading-snug text-slate-300">{translateContent(selectedPart.desc, language)}</div>
                         </div>
                         <RealisticEvCar
                           wheelDuration={wheelDuration}
@@ -182,16 +182,16 @@ export function InteractivePowertrain({ title, targetTheme }: { title: string; t
                           onClick={() => setSelectedPartId(part.id)}
                           className={`w-full rounded border p-2 text-left transition-colors ${isActive ? 'border-blue-500/40 bg-blue-950/25' : 'border-slate-800 bg-slate-950/60 hover:border-slate-700'}`}
                         >
-                          <div className={`text-[11px] font-bold ${isActive ? 'text-blue-300' : 'text-slate-300'}`}>{part.name}</div>
-                          {isActive && <div className="mt-1 text-[10px] leading-snug text-slate-400">{part.desc}</div>}
+                          <div className={`text-[11px] font-bold ${isActive ? 'text-blue-300' : 'text-slate-300'}`}>{translateContent(part.name, language)}</div>
+                          {isActive && <div className="mt-1 text-[10px] leading-snug text-slate-400">{translateContent(part.desc, language)}</div>}
                         </button>
                       );
                     })}
                   </div>
                   <div className="mt-3 rounded border border-slate-800 bg-slate-950 p-2">
                     <div className="text-[9px] font-bold uppercase tracking-widest text-slate-500">{t(language, 'currentSelection')}</div>
-                    <div className="mt-1 text-xs font-bold text-slate-200">{selectedPart.name}</div>
-                    <div className="mt-1 text-[10px] leading-snug text-slate-500">{selectedPart.desc}</div>
+                    <div className="mt-1 text-xs font-bold text-slate-200">{translateContent(selectedPart.name, language)}</div>
+                    <div className="mt-1 text-[10px] leading-snug text-slate-500">{translateContent(selectedPart.desc, language)}</div>
                   </div>
                 </div>
               </div>
@@ -207,12 +207,13 @@ export function InteractivePowertrain({ title, targetTheme }: { title: string; t
                 efficiency={efficiencyKwhPer100}
                 riskLabel={riskState.label}
                 riskColor={riskState.color}
+                language={language}
               />
 
               <div className="rounded-lg border border-slate-800 bg-slate-950 p-4">
                 <div className="mb-3 flex items-center justify-between">
-                  <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400">실시간 주행 그래프</h3>
-                  <span className="text-[10px] font-mono text-slate-600">최근 28초</span>
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400">{translateContent('실시간 주행 그래프', language)}</h3>
+                  <span className="text-[10px] font-mono text-slate-600">{translateContent('최근 28초', language)}</span>
                 </div>
                 <div className="h-56">
                   <ResponsiveContainer width="100%" height="100%">
@@ -231,8 +232,8 @@ export function InteractivePowertrain({ title, targetTheme }: { title: string; t
                       <XAxis dataKey="t" tick={{ fill: '#64748b', fontSize: 10 }} minTickGap={18} />
                       <YAxis tick={{ fill: '#64748b', fontSize: 10 }} />
                       <Tooltip contentStyle={{ background: '#020617', border: '1px solid #334155', borderRadius: 8, color: '#e2e8f0', fontSize: 11 }} />
-                      <Area type="monotone" dataKey="speed" name="속도 km/h" stroke="#22d3ee" fill="url(#speedFill)" strokeWidth={2} />
-                      <Area type="monotone" dataKey="power" name="출력 kW" stroke="#f59e0b" fill="url(#powerFill)" strokeWidth={2} />
+                      <Area type="monotone" dataKey="speed" name={`${translateContent('속도', language)} km/h`} stroke="#22d3ee" fill="url(#speedFill)" strokeWidth={2} />
+                      <Area type="monotone" dataKey="power" name={`${translateContent('출력', language)} kW`} stroke="#f59e0b" fill="url(#powerFill)" strokeWidth={2} />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
@@ -241,7 +242,7 @@ export function InteractivePowertrain({ title, targetTheme }: { title: string; t
           </div>
 
           <div className="rounded-lg border border-slate-800 bg-slate-950 p-4">
-            <h3 className="mb-4 border-b border-slate-800 pb-2 text-xs font-bold uppercase tracking-widest text-slate-400">주행 제어 패널</h3>
+            <h3 className="mb-4 border-b border-slate-800 pb-2 text-xs font-bold uppercase tracking-widest text-slate-400">{translateContent('주행 제어 패널', language)}</h3>
 
             <div className="grid grid-cols-3 gap-2">
               {(['eco', 'normal', 'sport'] as const).map(mode => (
@@ -264,7 +265,7 @@ export function InteractivePowertrain({ title, targetTheme }: { title: string; t
             </div>
 
             <ControlSlider
-              label="가속 페달"
+              label={translateContent('가속 페달', language)}
               value={throttle}
               unit="%"
               min={0}
@@ -275,7 +276,7 @@ export function InteractivePowertrain({ title, targetTheme }: { title: string; t
             />
 
             <ControlSlider
-              label="차량 속도 직접 설정"
+              label={translateContent('차량 속도 직접 설정', language)}
               value={vehicleSpeed}
               unit="km/h"
               min={0}
@@ -286,9 +287,9 @@ export function InteractivePowertrain({ title, targetTheme }: { title: string; t
             />
 
             <ControlSlider
-              label="회생제동 단계"
+              label={translateContent('회생제동 단계', language)}
               value={regenLevel}
-              unit="단계"
+              unit={translateContent('단계', language)}
               min={0}
               max={3}
               step={1}
@@ -298,7 +299,7 @@ export function InteractivePowertrain({ title, targetTheme }: { title: string; t
             />
 
             <ControlSlider
-              label="인버터 온도 조건"
+              label={translateContent('인버터 온도 조건', language)}
               value={inverterTemp}
               unit="°C"
               min={20}
@@ -308,25 +309,25 @@ export function InteractivePowertrain({ title, targetTheme }: { title: string; t
             />
 
             <div className="mt-5 rounded border border-slate-800 bg-slate-900 p-3">
-              <h4 className="mb-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">현재 상태 해석</h4>
+              <h4 className="mb-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">{translateContent('현재 상태 해석', language)}</h4>
               <ul className="space-y-2 text-[11px] leading-relaxed text-slate-400">
-                <li>속도를 올리면 모터 RPM, 출력, 시스템 전류, 인버터/모터 온도가 함께 상승합니다.</li>
-                <li>회생제동 단계가 높고 가속 페달이 낮으면 감속이 빨라지고 전비가 개선됩니다.</li>
-                <li>인버터 온도가 85°C를 넘으면 출력 제한 경고가 표시됩니다.</li>
+                <li>{translateContent('속도를 올리면 모터 RPM, 출력, 시스템 전류, 인버터/모터 온도가 함께 상승합니다.', language)}</li>
+                <li>{translateContent('회생제동 단계가 높고 가속 페달이 낮으면 감속이 빨라지고 전비가 개선됩니다.', language)}</li>
+                <li>{translateContent('인버터 온도가 85°C를 넘으면 출력 제한 경고가 표시됩니다.', language)}</li>
               </ul>
             </div>
 
             <div className="mt-4 grid grid-cols-2 gap-3">
-              <StatusTile icon={<Thermometer size={14} />} label="모터 온도" value={`${motorTemp.toFixed(1)}°C`} />
-              <StatusTile icon={<Flame size={14} />} label="인버터 온도" value={`${inverterTemp.toFixed(1)}°C`} />
-              <StatusTile icon={<Activity size={14} />} label="시스템 전류" value={`${sysCurrent.toFixed(1)} A`} />
-              <StatusTile icon={<Route size={14} />} label="전비" value={efficiencyKwhPer100 ? `${efficiencyKwhPer100.toFixed(1)} kWh/100km` : '대기'} />
+              <StatusTile icon={<Thermometer size={14} />} label={translateContent('모터 온도', language)} value={`${motorTemp.toFixed(1)}°C`} />
+              <StatusTile icon={<Flame size={14} />} label={translateContent('인버터 온도', language)} value={`${inverterTemp.toFixed(1)}°C`} />
+              <StatusTile icon={<Activity size={14} />} label={translateContent('시스템 전류', language)} value={`${sysCurrent.toFixed(1)} A`} />
+              <StatusTile icon={<Route size={14} />} label={translateContent('전비', language)} value={efficiencyKwhPer100 ? `${efficiencyKwhPer100.toFixed(1)} kWh/100km` : translateContent('대기', language)} />
             </div>
 
             <button
               onClick={() => {
                 if (powerMode !== 'OFF') {
-                  alert('차량 전원을 OFF 한 후에만 고전압 플러그를 해제/체결할 수 있습니다.');
+                  alert(translateContent('차량 전원을 OFF 한 후에만 고전압 플러그를 해제/체결할 수 있습니다.', language));
                   return;
                 }
                 setMsdConnected(!msdConnected);
@@ -335,10 +336,10 @@ export function InteractivePowertrain({ title, targetTheme }: { title: string; t
                 msdConnected ? 'border-red-900/60 bg-red-950/40 text-red-400' : 'border-slate-700 bg-slate-800 text-slate-400'
               }`}
             >
-              {msdConnected ? 'MSD 플러그 해제' : 'MSD 플러그 체결'}
+              {translateContent(msdConnected ? 'MSD 플러그 해제' : 'MSD 플러그 체결', language)}
             </button>
 
-            <div className="mt-3 text-[10px] text-slate-600">팩 전압 {sysVoltage.toFixed(1)}V · BMS {bmsFault.toUpperCase()}</div>
+            <div className="mt-3 text-[10px] text-slate-600">{translateContent('팩 전압', language)} {sysVoltage.toFixed(1)}V · BMS {bmsFault.toUpperCase()}</div>
           </div>
         </div>
       </div>
@@ -395,7 +396,7 @@ function RealisticEvCar({
   );
 }
 
-function InstrumentCluster({ speed, throttle, regenLevel, powerKw, torqueNm, efficiency, riskLabel, riskColor }: {
+function InstrumentCluster({ speed, throttle, regenLevel, powerKw, torqueNm, efficiency, riskLabel, riskColor, language }: {
   speed: number;
   throttle: number;
   regenLevel: number;
@@ -404,24 +405,25 @@ function InstrumentCluster({ speed, throttle, regenLevel, powerKw, torqueNm, eff
   efficiency: number;
   riskLabel: string;
   riskColor: string;
+  language: Language;
 }) {
   const speedDeg = -130 + Math.min(260, speed / 180 * 260);
   const powerDeg = -130 + Math.min(260, powerKw / 170 * 260);
   return (
     <div className="rounded-lg border border-slate-800 bg-slate-950 p-4">
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400">디지털 계기판</h3>
-        <span className={`text-[10px] font-bold ${riskColor}`}>{riskLabel}</span>
+        <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400">{translateContent('디지털 계기판', language)}</h3>
+        <span className={`text-[10px] font-bold ${riskColor}`}>{translateContent(riskLabel, language)}</span>
       </div>
       <div className="grid grid-cols-2 gap-4">
         <GaugeDial label="SPEED" value={`${speed.toFixed(0)}`} unit="km/h" deg={speedDeg} color="#22d3ee" />
         <GaugeDial label="POWER" value={`${powerKw.toFixed(0)}`} unit="kW" deg={powerDeg} color="#f59e0b" />
       </div>
       <div className="mt-4 grid grid-cols-2 gap-2 text-[11px]">
-        <StatusTile label="가속 페달" value={`${throttle.toFixed(0)}%`} />
-        <StatusTile label="회생제동" value={`Lv.${regenLevel}`} />
-        <StatusTile label="토크" value={`${torqueNm.toFixed(0)} Nm`} />
-        <StatusTile label="전비" value={efficiency ? `${efficiency.toFixed(1)}` : '0.0'} />
+        <StatusTile label={translateContent('가속 페달', language)} value={`${throttle.toFixed(0)}%`} />
+        <StatusTile label={translateContent('회생제동', language)} value={`Lv.${regenLevel}`} />
+        <StatusTile label={translateContent('토크', language)} value={`${torqueNm.toFixed(0)} Nm`} />
+        <StatusTile label={translateContent('전비', language)} value={efficiency ? `${efficiency.toFixed(1)}` : '0.0'} />
       </div>
     </div>
   );

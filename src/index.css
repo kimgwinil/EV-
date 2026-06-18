@@ -552,7 +552,7 @@ body {
 
 @keyframes topWheelSpin {
   from { background-position: 0 0; }
-  to { background-position: 0 30px; }
+  to { background-position: 0 -30px; }
 }
 
 .topdown-wheel {

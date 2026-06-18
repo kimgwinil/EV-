@@ -47,23 +47,23 @@ export function BmsSimulator() {
             <h2 className="font-bold text-sm tracking-widest uppercase">BMS CELL BALANCING SIMULATOR</h2>
          </div>
          <div className="flex gap-2 font-mono">
-            <span className="bg-slate-900 px-2 py-1 rounded border border-slate-700 text-[10px] text-slate-400">STATUS: <span className={isBalancing ? "text-amber-500 font-bold" : "text-slate-300"}>{isBalancing ? 'BALANCING' : 'IDLE'}</span></span>
-            <span className="bg-slate-900 px-2 py-1 rounded border border-slate-700 text-[10px] text-slate-400">SYS_V: <span className="text-blue-400 font-bold">{sysVoltage.toFixed(1)}V</span></span>
+            <span className="rounded border border-slate-300 bg-white px-2 py-1 text-[10px] font-black text-slate-700">STATUS: <span className={isBalancing ? "text-amber-700 font-black" : "text-slate-950 font-black"}>{isBalancing ? 'BALANCING' : 'IDLE'}</span></span>
+            <span className="rounded border border-slate-300 bg-white px-2 py-1 text-[10px] font-black text-slate-700">SYS_V: <span className="font-black text-blue-800">{sysVoltage.toFixed(1)}V</span></span>
          </div>
       </div>
 
       <div className="p-3 grid grid-cols-4 gap-3 border-b border-slate-800 bg-slate-900/50 shrink-0">
-         <div className="col-span-1 space-y-2 p-3 bg-slate-950 rounded border border-slate-800">
-             <h3 className="font-bold text-slate-500 uppercase tracking-widest text-[10px] mb-2 border-b border-slate-800 pb-2">Scenario Select</h3>
-             <label className="flex items-center gap-2 cursor-pointer text-slate-300 hover:text-slate-200">
+         <div className="col-span-1 space-y-2 p-3 bg-white rounded border border-slate-300 shadow-sm">
+             <h3 className="font-black text-slate-800 uppercase tracking-widest text-[10px] mb-2 border-b border-slate-300 pb-2">Scenario Select</h3>
+             <label className="flex items-center gap-2 cursor-pointer font-bold text-slate-800 hover:text-slate-950">
                  <input type="radio" checked={localFault==='none'} onChange={()=>handleScenarioChange('none')} className="text-blue-500 bg-slate-900 border-slate-700 focus:ring-blue-500 focus:ring-offset-slate-950 accent-blue-500" /> 
                  <span>{translateContent('정상 상태', language)}</span>
              </label>
-             <label className="flex items-center gap-2 cursor-pointer text-slate-300 hover:text-slate-200">
+             <label className="flex items-center gap-2 cursor-pointer font-bold text-slate-800 hover:text-slate-950">
                  <input type="radio" checked={localFault==='cell_degradation'} onChange={()=>handleScenarioChange('cell_degradation')} className="text-blue-500 bg-slate-900 border-slate-700 focus:ring-blue-500 focus:ring-offset-slate-950 accent-blue-500" /> 
                  <span>{translateContent('셀 편차 발생 (열화)', language)}</span>
              </label>
-             <label className="flex items-center gap-2 cursor-pointer text-red-400 hover:text-red-300">
+             <label className="flex items-center gap-2 cursor-pointer font-bold text-red-700 hover:text-red-900">
                  <input type="radio" checked={localFault==='temp_warning'} onChange={()=>handleScenarioChange('temp_warning')} className="text-blue-500 bg-slate-900 border-slate-700 focus:ring-blue-500 focus:ring-offset-slate-950 accent-blue-500" /> 
                  <span>{translateContent('고온 경고 발생', language)}</span>
              </label>
@@ -84,7 +84,7 @@ export function BmsSimulator() {
                         <Power size={14}/> {translateContent(isBalancing ? '밸런싱 중지' : '수동(Passive) 밸런싱 시작', language)}
                      </button>
                  </div>
-                 <p className="text-[10px] text-slate-500 max-w-lg text-center">
+                 <p className="text-[10px] font-semibold text-slate-700 max-w-lg text-center">
                     {translateContent('패시브 밸런싱은 전압이 가장 높은 셀의 에너지를 저항을 통해 열로 소비시켜 낮은 셀과 전압을 맞춥니다. 이 과정에서 열이 발생합니다. 실제 데이터 베이스를 통해 동기화됩니다.', language)}
                  </p>
              </div>
@@ -140,18 +140,18 @@ export function BmsSimulator() {
 
          <div className="grid grid-cols-8 gap-2 shrink-0">
             {cells.slice(0, 8).map(cell => (
-                <div key={cell.id} className={`flex flex-col items-center p-2 rounded border ${
-                    cell.temp >= 60 ? 'bg-red-950/20 border-red-900' :
-                    cell.balancing ? 'bg-amber-950/20 border-amber-900/50' : 'bg-slate-900 border-slate-800'
+                <div key={cell.id} className={`flex flex-col items-center p-2 rounded border shadow-sm ${
+                    cell.temp >= 60 ? 'bg-red-50 border-red-300' :
+                    cell.balancing ? 'bg-amber-50 border-amber-300' : 'bg-white border-slate-300'
                 }`}>
-                    <div className="font-bold text-slate-300 mb-0.5 text-[10px]">{cell.id}</div>
-                    <div className="text-[10px] font-mono text-slate-500">{cell.voltage.toFixed(3)}V</div>
-                    <div className={`text-[10px] font-mono font-bold mt-0.5 max-w-full truncate ${cell.temp >= 60 ? 'text-red-400' : cell.balancing ? 'text-amber-400' : 'text-blue-400'}`}>{cell.soc.toFixed(1)}%</div>
+                    <div className="font-black text-slate-900 mb-0.5 text-[10px]">{cell.id}</div>
+                    <div className="text-[10px] font-mono font-bold text-slate-700">{cell.voltage.toFixed(3)}V</div>
+                    <div className={`text-[10px] font-mono font-black mt-0.5 max-w-full truncate ${cell.temp >= 60 ? 'text-red-700' : cell.balancing ? 'text-amber-700' : 'text-blue-800'}`}>{cell.soc.toFixed(1)}%</div>
                     
                     <div className="w-full bg-slate-800 h-1 rounded-full mt-2 overflow-hidden flex">
                        <div className={`h-full ${cell.temp >= 60 ? 'bg-red-500' : cell.temp > 40 ? 'bg-amber-500' : 'bg-emerald-500'}`} style={{width: `${(cell.temp/80)*100}%`}}></div>
                     </div>
-                    <div className="text-[9px] font-mono text-slate-500 mt-0.5">{cell.temp.toFixed(1)}°C</div>
+                    <div className="text-[9px] font-mono font-bold text-slate-700 mt-0.5">{cell.temp.toFixed(1)}°C</div>
 
                     {cell.temp >= 60 && <AlertTriangle size={12} className="text-red-500 mt-1.5 animate-pulse"/>}
                 </div>
@@ -166,13 +166,13 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload as EvCell;
     return (
-      <div className="bg-slate-900 border border-slate-700 p-3 rounded shadow-lg text-slate-300 text-[10px] font-sans pointer-events-none tracking-wide z-50 relative">
-        <p className="font-bold text-xs mb-2 uppercase tracking-widest text-slate-400 border-b border-slate-800 pb-1">{label} DETAILS</p>
+      <div className="bg-white border border-slate-300 p-3 rounded shadow-lg text-slate-900 text-[10px] font-sans pointer-events-none tracking-wide z-50 relative">
+        <p className="font-black text-xs mb-2 uppercase tracking-widest text-slate-900 border-b border-slate-300 pb-1">{label} DETAILS</p>
         <div className="space-y-1.5">
-           <div className="flex justify-between gap-4"><span className="text-slate-500">Voltage:</span> <span className="font-mono text-blue-400 font-bold">{data.voltage.toFixed(3)}V</span></div>
-           <div className="flex justify-between gap-4"><span className="text-slate-500">SOC:</span> <span className="font-mono text-blue-400 font-bold">{data.soc.toFixed(1)}%</span></div>
-           <div className="flex justify-between gap-4"><span className="text-slate-500">Temperature:</span> <span className={`font-mono font-bold ${data.temp >= 60 ? 'text-red-400' : 'text-emerald-400'}`}>{data.temp.toFixed(1)}°C</span></div>
-           <div className="flex justify-between gap-4 mt-1 pt-1 border-t border-slate-800"><span className="text-slate-500">Status:</span> {data.balancing ? <span className="text-amber-400 font-bold">BALANCING</span> : <span className="text-slate-500">IDLE</span>}</div>
+           <div className="flex justify-between gap-4"><span className="font-bold text-slate-700">Voltage:</span> <span className="font-mono text-blue-800 font-black">{data.voltage.toFixed(3)}V</span></div>
+           <div className="flex justify-between gap-4"><span className="font-bold text-slate-700">SOC:</span> <span className="font-mono text-blue-800 font-black">{data.soc.toFixed(1)}%</span></div>
+           <div className="flex justify-between gap-4"><span className="font-bold text-slate-700">Temperature:</span> <span className={`font-mono font-black ${data.temp >= 60 ? 'text-red-700' : 'text-emerald-700'}`}>{data.temp.toFixed(1)}°C</span></div>
+           <div className="flex justify-between gap-4 mt-1 pt-1 border-t border-slate-300"><span className="font-bold text-slate-700">Status:</span> {data.balancing ? <span className="text-amber-700 font-black">BALANCING</span> : <span className="text-slate-900 font-black">IDLE</span>}</div>
         </div>
       </div>
     );

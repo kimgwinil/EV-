@@ -482,9 +482,9 @@ function ControlSlider({ label, value, unit, min, max, step = 1, tone, disabled,
 
 function MetricCard({ icon, label, value, tone }: { icon: React.ReactNode; label: string; value: string; tone: string }) {
   return (
-    <div className="rounded border border-slate-800 bg-slate-950/80 p-3 backdrop-blur">
-      <div className={`mb-1 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest ${tone}`}>{icon}{label}</div>
-      <div className="font-mono text-lg font-bold text-white">{value}</div>
+    <div className="rounded border border-slate-300 bg-white/95 p-3 shadow-sm backdrop-blur" data-tone={tone}>
+      <div className="mb-1 flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-slate-700">{icon}{label}</div>
+      <div className="font-mono text-xl font-black text-slate-950">{value}</div>
     </div>
   );
 }

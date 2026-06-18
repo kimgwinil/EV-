@@ -27,7 +27,7 @@ const uiText = {
     weeksSummary: '16 WEEKS / 160 HOURS / 80 SESSIONS',
     loading: 'LOADING',
     preparation: '준비 중입니다...',
-    language: '언어',
+    language: 'Language',
     currentDirectory: 'Curr Directory',
     viewSafetyManual: 'View Safety Manual',
     trainingMode: 'TRAINING MODE',

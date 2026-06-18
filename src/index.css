@@ -480,12 +480,49 @@ body {
 }
 
 .blueprint-floor {
+  position: absolute;
+  overflow: hidden;
   background:
-    linear-gradient(rgba(30,41,59,0.34) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(30,41,59,0.34) 1px, transparent 1px),
-    radial-gradient(circle at 50% 45%, rgba(14,165,233,0.12), transparent 36%),
-    linear-gradient(180deg, #020617, #0f172a 60%, #020617);
-  background-size: 36px 36px, 36px 36px, 100% 100%, 100% 100%;
+    linear-gradient(90deg, rgba(15,23,42,0.18) 0 6%, transparent 13% 87%, rgba(15,23,42,0.18) 94% 100%),
+    radial-gradient(ellipse at 50% 34%, rgba(125,211,252,0.24), transparent 34%),
+    linear-gradient(90deg, #5f7185 0 18%, #3f5268 28% 72%, #5f7185 82% 100%),
+    repeating-linear-gradient(180deg, rgba(255,255,255,0.05) 0 1px, transparent 1px 34px);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 100% 34px;
+}
+
+.blueprint-floor::before,
+.blueprint-floor::after {
+  content: "";
+  position: absolute;
+  top: -32px;
+  bottom: -32px;
+  width: 5px;
+  border-radius: 999px;
+  background:
+    repeating-linear-gradient(
+      180deg,
+      rgba(255,255,255,0.96) 0 28px,
+      rgba(255,255,255,0.16) 28px 30px,
+      transparent 30px 62px
+    );
+  box-shadow:
+    0 0 0 1px rgba(15,23,42,0.1),
+    0 0 14px rgba(255,255,255,0.38);
+  opacity: 0.92;
+  animation: roadDashFlow 1.15s linear infinite;
+}
+
+.blueprint-floor::before {
+  left: calc(50% - 132px);
+}
+
+.blueprint-floor::after {
+  left: calc(50% + 128px);
+}
+
+@keyframes roadDashFlow {
+  from { background-position-y: 0; }
+  to { background-position-y: 62px; }
 }
 
 @keyframes topWheelSpin {

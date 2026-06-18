@@ -13,10 +13,21 @@ export function BmsSimulator() {
       toggleBalancing, 
       chargeStep, 
       setFaultScenario, 
-      sysVoltage 
+      sysVoltage,
+      packSoc,
+      motorRpm,
+      inverterTemp,
+      msdConnected,
+      vehicleSpeed
   } = useVehicleStore();
 
   const [localFault, setLocalFault] = useState<'none' | 'cell_degradation' | 'temp_warning'>('none');
+  const wheelDuration = vehicleSpeed > 0 ? `${Math.max(0.22, 2.4 - vehicleSpeed / 38)}s` : '0s';
+  const roadDashDuration = `${Math.max(0.22, 2.2 - vehicleSpeed / 45)}s`;
+  const roadDashStyle = {
+      '--road-dash-duration': roadDashDuration,
+      '--road-dash-play-state': vehicleSpeed > 0 ? 'running' : 'paused',
+  } as React.CSSProperties;
 
   const handleScenarioChange = (s: 'none' | 'cell_degradation' | 'temp_warning') => {
       setLocalFault(s);
@@ -57,24 +68,51 @@ export function BmsSimulator() {
                  <span>{translateContent('고온 경고 발생', language)}</span>
              </label>
          </div>
-         <div className="col-span-3 p-3 bg-slate-950 rounded border border-slate-800 flex flex-col justify-center items-center gap-3">
-             <div className="flex gap-3">
-                 <button 
-                    onClick={startCharge}
-                    className="bg-blue-900/30 hover:bg-blue-900/50 text-blue-400 border border-blue-500/50 font-bold py-1.5 px-4 rounded text-xs transition-colors uppercase tracking-wide"
-                 >
-                    {translateContent('전체 충전 (+5%)', language)}
-                 </button>
-                 <button 
-                    onClick={toggleBalancing}
-                    className={`${isBalancing ? 'bg-amber-900/30 hover:bg-amber-900/50 text-amber-500 border-amber-500/50' : 'bg-green-900/30 hover:bg-green-900/50 text-green-500 border-green-500/50'} border font-bold py-1.5 px-4 rounded text-xs transition-colors flex items-center gap-2 uppercase tracking-wide`}
-                 >
-                    <Power size={14}/> {translateContent(isBalancing ? '밸런싱 중지' : '수동(Passive) 밸런싱 시작', language)}
-                 </button>
+         <div className="col-span-3 grid gap-3 rounded border border-slate-800 bg-slate-950 p-3 md:grid-cols-[minmax(250px,1fr)_300px]">
+             <div className="flex flex-col justify-center items-center gap-3">
+                 <div className="flex flex-wrap justify-center gap-3">
+                     <button 
+                        onClick={startCharge}
+                        className="bg-blue-900/30 hover:bg-blue-900/50 text-blue-400 border border-blue-500/50 font-bold py-1.5 px-4 rounded text-xs transition-colors uppercase tracking-wide"
+                     >
+                        {translateContent('전체 충전 (+5%)', language)}
+                     </button>
+                     <button 
+                        onClick={toggleBalancing}
+                        className={`${isBalancing ? 'bg-amber-900/30 hover:bg-amber-900/50 text-amber-500 border-amber-500/50' : 'bg-green-900/30 hover:bg-green-900/50 text-green-500 border-green-500/50'} border font-bold py-1.5 px-4 rounded text-xs transition-colors flex items-center gap-2 uppercase tracking-wide`}
+                     >
+                        <Power size={14}/> {translateContent(isBalancing ? '밸런싱 중지' : '수동(Passive) 밸런싱 시작', language)}
+                     </button>
+                 </div>
+                 <p className="text-[10px] text-slate-500 max-w-lg text-center">
+                    {translateContent('패시브 밸런싱은 전압이 가장 높은 셀의 에너지를 저항을 통해 열로 소비시켜 낮은 셀과 전압을 맞춥니다. 이 과정에서 열이 발생합니다. 실제 데이터 베이스를 통해 동기화됩니다.', language)}
+                 </p>
              </div>
-             <p className="text-[10px] text-slate-500 max-w-lg text-center">
-                {translateContent('패시브 밸런싱은 전압이 가장 높은 셀의 에너지를 저항을 통해 열로 소비시켜 낮은 셀과 전압을 맞춥니다. 이 과정에서 열이 발생합니다. 실제 데이터 베이스를 통해 동기화됩니다.', language)}
-             </p>
+             <div className="relative min-h-[190px] overflow-hidden rounded border border-slate-700 bg-slate-950">
+                <div className="absolute inset-0 blueprint-floor" style={roadDashStyle} />
+                <div className="absolute inset-0 bg-gradient-to-b from-slate-950/10 via-slate-950/45 to-slate-950/80" />
+                <div className="absolute right-2 top-2 z-30 rounded border border-blue-500/40 bg-white/90 px-2 py-1 font-mono text-[10px] font-black text-slate-950">
+                   {vehicleSpeed.toFixed(0)} km/h
+                </div>
+                <div className="absolute inset-0 z-20 flex items-center justify-center">
+                   <div className="topdown-ev scale-[0.78]">
+                      <div className="topdown-ev-texture" />
+                      <div className="topdown-wheel front-left" style={{ animationDuration: wheelDuration, animationPlayState: vehicleSpeed > 0 ? 'running' : 'paused' }} />
+                      <div className="topdown-wheel front-right" style={{ animationDuration: wheelDuration, animationPlayState: vehicleSpeed > 0 ? 'running' : 'paused' }} />
+                      <div className="topdown-wheel rear-left" style={{ animationDuration: wheelDuration, animationPlayState: vehicleSpeed > 0 ? 'running' : 'paused' }} />
+                      <div className="topdown-wheel rear-right" style={{ animationDuration: wheelDuration, animationPlayState: vehicleSpeed > 0 ? 'running' : 'paused' }} />
+                      <div className={`topdown-cable ${!msdConnected ? 'is-cut' : ''}`} />
+                   </div>
+                   <div className="absolute h-[180px] w-[112px] scale-[0.78]">
+                      <div className="safety-top-module motor">MOTOR<br />{motorRpm.toFixed(0)} RPM</div>
+                      <div className="safety-top-module inverter">INVERTER<br />{inverterTemp.toFixed(1)}°C</div>
+                      <div className="safety-top-pack">HV BATTERY<br />{packSoc.toFixed(1)}% / {sysVoltage.toFixed(0)}V</div>
+                      <div className={`safety-top-msd ${!msdConnected ? 'is-cut' : ''}`}>MSD</div>
+                      <div className="safety-top-module bms is-selected">BMS<br />{isBalancing ? 'BAL' : 'IDLE'}</div>
+                      <div className="safety-top-module obc">OBC/LDC<br />STBY</div>
+                   </div>
+                </div>
+             </div>
          </div>
       </div>
 

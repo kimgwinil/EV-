@@ -298,6 +298,7 @@ const buildPractice = (week: WeekPlan, weekNumber: number): PracticeData => ({
     { id: 'p7', action: `${week.faults[1]} 가능성을 회로도 또는 데이터 흐름 기준으로 배제/확정한다.` },
     { id: 'p8', action: '복구, 재검증, 작업장 정리, 고객 설명용 요약을 작성한다.' }
   ],
+  measurementRows: buildMeasurementRows(week),
   scenarios: [
     { normal: `${week.practiceTopic}: 기준값과 데이터 스트림이 허용범위 안에 있고 관련 DTC가 없다.`, abnormal: `${week.faults[0]}: 증상 재현 후 안전 차단, 측정, 원인 후보 기록 순서로 대응한다.` },
     { normal: '작업 후 재검증에서 경고등과 DTC가 재발하지 않는다.', abnormal: `${week.faults[1]}: 단일 부품 교환 전 전원·통신·열관리 조건을 교차 확인한다.` }
@@ -310,6 +311,41 @@ const buildPractice = (week: WeekPlan, weekNumber: number): PracticeData => ({
     { item: '정리·복구·보고 품질', points: 15 }
   ]
 });
+
+const buildMeasurementRows = (week: WeekPlan) => {
+  const rows = [
+    { item: '고전압 잔류전압', referenceValue: '0~30', unit: 'V DC', tolerance: '제조사 기준 이하' },
+    { item: '절연저항', referenceValue: '1 이상', unit: 'MΩ', tolerance: '차량 기준 우선' },
+    { item: '12V 보조전원', referenceValue: '12.4~14.5', unit: 'V', tolerance: '상태별 기준 적용' },
+    { item: '관련 센서 데이터', referenceValue: '정상범위', unit: '스캐너값', tolerance: 'Freeze Frame 비교' }
+  ];
+
+  const text = `${week.theme} ${week.ncs} ${week.theoryFocus.join(' ')} ${week.practiceTopic} ${week.faults.join(' ')}`;
+
+  if (/배터리|BMS|열관리|충전|회생|V2|캡스톤|복합/.test(text)) {
+    rows.push(
+      { item: '배터리 팩 최고온도', referenceValue: '15~45', unit: '°C', tolerance: '급속충전·고부하 시 제한값 확인' },
+      { item: '셀/모듈 온도 편차', referenceValue: '5 이하', unit: '°C', tolerance: '센서 위치별 추세 비교' },
+      { item: 'SOC/SOH 및 셀 전압 편차', referenceValue: '편차 최소', unit: '%, mV', tolerance: 'BMS 데이터 기준' }
+    );
+  }
+
+  if (/열관리|냉각|배터리|인버터|모터|출력제한|캡스톤|복합/.test(text)) {
+    rows.push(
+      { item: '냉각수 펌프/팬 명령', referenceValue: '온도 상승 시 증가', unit: '%', tolerance: '실제 온도 추세와 일치' },
+      { item: '냉각수 입출구 온도차', referenceValue: '1~8', unit: '°C', tolerance: '순환 불량·공기 혼입 확인' }
+    );
+  }
+
+  if (/충전|OBC|V2|인렛|충전인프라/.test(text)) {
+    rows.push(
+      { item: '충전 인렛 온도', referenceValue: '60 이하', unit: '°C', tolerance: '과열 시 전류 제한' },
+      { item: 'BMS 허용 충전전류', referenceValue: '온도·SOC별 가변', unit: 'A', tolerance: '충전기 요청값과 비교' }
+    );
+  }
+
+  return rows;
+};
 
 const buildEvaluation = (week: WeekPlan, weekNumber: number): EvaluationData => {
   const isCumulative = [4, 8, 12, 16].includes(weekNumber);

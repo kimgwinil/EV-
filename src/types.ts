@@ -31,6 +31,7 @@ export interface PracticeData {
   equipment: string[];
   safety: { level: 'low' | 'medium' | 'high'; rules: string[] };
   steps: { id: string; action: string; safetyMeasure?: string }[];
+  measurementRows: { item: string; referenceValue: string; unit: string; tolerance: string }[];
   scenarios: { normal: string; abnormal: string }[];
   checklist: { item: string; points: number }[];
 }

@@ -47,7 +47,7 @@ export interface VehicleTelemetryDB {
     setPackSoc: (soc: number) => void;
     setInverterTemp: (temp: number) => void;
     toggleBalancing: () => void;
-    setFaultScenario: (fault: 'none' | 'temp_warning' | 'cell_degradation') => void;
+    setFaultScenario: (fault: 'none' | 'temp_warning' | 'cell_degradation' | 'cooling_failure') => void;
     chargeStep: () => void;
     tickSimulation: () => void;
 }
@@ -141,6 +141,17 @@ export const useVehicleStore = create<VehicleTelemetryDB>((set, get) => ({
             newCells[12].voltage = 4.1;
             newCells[12].soc = 90;
             return { bmsFault: 'cell_imbalance', cells: newCells };
+        } else if (fault === 'cooling_failure') {
+            const overheatedCells = newCells.map((cell, index) => ({
+                ...cell,
+                temp: index >= 5 && index <= 10 ? 52 + Math.random() * 9 : 39 + Math.random() * 5
+            }));
+            return {
+                bmsFault: 'temp_warning',
+                cells: overheatedCells,
+                packTemp: Math.max(...overheatedCells.map(c => c.temp)),
+                obcActive: false
+            };
         }
         return {};
     }),

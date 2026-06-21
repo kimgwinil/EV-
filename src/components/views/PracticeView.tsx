@@ -134,14 +134,12 @@ export function PracticeView({ session }: { session: Session }) {
                        </tr>
                    </thead>
                    <tbody className="divide-y divide-slate-800">
-                       {[
-                         ['고전압 잔류전압', '0~30', 'V DC', '제조사 기준 이하'],
-                         ['절연저항', '1 이상', 'MΩ', '차량 기준 우선'],
-                         ['12V 보조전원', '12.4~14.5', 'V', '상태별 기준 적용'],
-                         ['관련 센서 데이터', '정상범위', '스캐너값', 'Freeze Frame 비교']
-                       ].map((row, idx) => (
+                       {data.measurementRows.map((row, idx) => (
                          <tr key={idx} className="hover:bg-slate-800/40">
-                           {row.map((cell, cellIdx) => <td key={cellIdx} className="py-2 px-3 text-slate-300">{translateContent(cell, language)}</td>)}
+                           <td className="py-2 px-3 text-slate-300">{translateContent(row.item, language)}</td>
+                           <td className="py-2 px-3 text-slate-300">{translateContent(row.referenceValue, language)}</td>
+                           <td className="py-2 px-3 text-slate-300">{translateContent(row.unit, language)}</td>
+                           <td className="py-2 px-3 text-slate-300">{translateContent(row.tolerance, language)}</td>
                            <td className="py-2 px-3 text-slate-600">{t(language, 'record')}</td>
                            <td className="py-2 px-3 text-slate-600">{t(language, 'normalAbnormal')}</td>
                          </tr>

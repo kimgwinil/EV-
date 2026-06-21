@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts';
-import { Power, AlertTriangle, Info, Settings2 } from 'lucide-react';
+import { Power, AlertTriangle, Settings2, Thermometer, Fan, Droplets, BatteryCharging } from 'lucide-react';
 import { useVehicleStore, EvCell } from '../../../store/vehicleStore';
 import { translateContent, useLanguageStore } from '../../../i18n';
 
@@ -21,7 +21,27 @@ export function BmsSimulator() {
       vehicleSpeed
   } = useVehicleStore();
 
-  const [localFault, setLocalFault] = useState<'none' | 'cell_degradation' | 'temp_warning'>('none');
+  const [localFault, setLocalFault] = useState<'none' | 'cell_degradation' | 'temp_warning' | 'cooling_failure'>('none');
+  const maxTemp = Math.max(...cells.map(cell => cell.temp));
+  const minTemp = Math.min(...cells.map(cell => cell.temp));
+  const avgTemp = cells.reduce((sum, cell) => sum + cell.temp, 0) / cells.length;
+  const tempDelta = maxTemp - minTemp;
+  const coolingDemand = Math.max(0, Math.min(100, (maxTemp - 30) * 4 + (tempDelta > 8 ? 15 : 0)));
+  const pumpCommand = localFault === 'cooling_failure' ? Math.min(35, coolingDemand) : coolingDemand;
+  const fanCommand = localFault === 'cooling_failure' ? Math.min(25, coolingDemand * 0.8) : Math.max(0, coolingDemand - 10);
+  const chargeLimit = maxTemp >= 60 ? 0 : maxTemp >= 50 ? 24 : maxTemp <= 5 ? 18 : packSoc >= 90 ? 35 : 90;
+  const coolantStatus = localFault === 'cooling_failure'
+      ? '냉각수 순환 저하'
+      : coolingDemand > 55
+        ? '고부하 냉각 중'
+        : '정상 순환';
+  const thermalStatus = maxTemp >= 60
+      ? '충전/출력 차단'
+      : maxTemp >= 50
+        ? '충전전류 제한'
+        : tempDelta > 8
+          ? '모듈 온도 편차 주의'
+          : '정상 열관리';
   const wheelDuration = vehicleSpeed > 0 ? `${Math.max(0.22, 2.4 - vehicleSpeed / 38)}s` : '0s';
   const roadDashDuration = `${Math.max(0.22, 2.2 - vehicleSpeed / 45)}s`;
   const roadDashStyle = {
@@ -29,7 +49,7 @@ export function BmsSimulator() {
       '--road-dash-play-state': vehicleSpeed > 0 ? 'running' : 'paused',
   } as React.CSSProperties;
 
-  const handleScenarioChange = (s: 'none' | 'cell_degradation' | 'temp_warning') => {
+  const handleScenarioChange = (s: 'none' | 'cell_degradation' | 'temp_warning' | 'cooling_failure') => {
       setLocalFault(s);
       setFaultScenario(s);
   }
@@ -67,6 +87,10 @@ export function BmsSimulator() {
                  <input type="radio" checked={localFault==='temp_warning'} onChange={()=>handleScenarioChange('temp_warning')} className="text-blue-500 bg-slate-900 border-slate-700 focus:ring-blue-500 focus:ring-offset-slate-950 accent-blue-500" /> 
                  <span>{translateContent('고온 경고 발생', language)}</span>
              </label>
+             <label className="flex items-center gap-2 cursor-pointer font-bold text-red-700 hover:text-red-900">
+                 <input type="radio" checked={localFault==='cooling_failure'} onChange={()=>handleScenarioChange('cooling_failure')} className="text-blue-500 bg-slate-900 border-slate-700 focus:ring-blue-500 focus:ring-offset-slate-950 accent-blue-500" /> 
+                 <span>{translateContent('냉각 성능 저하', language)}</span>
+             </label>
          </div>
          <div className="col-span-3 grid gap-3 rounded border border-slate-800 bg-slate-950 p-3 md:grid-cols-[minmax(250px,1fr)_300px]">
              <div className="flex flex-col justify-center items-center gap-3">
@@ -87,6 +111,14 @@ export function BmsSimulator() {
                  <p className="text-[10px] font-semibold text-slate-700 max-w-lg text-center">
                     {translateContent('패시브 밸런싱은 전압이 가장 높은 셀의 에너지를 저항을 통해 열로 소비시켜 낮은 셀과 전압을 맞춥니다. 이 과정에서 열이 발생합니다. 실제 데이터 베이스를 통해 동기화됩니다.', language)}
                  </p>
+                 <div className="grid w-full gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                    <ThermalReadout icon={<Thermometer size={14} />} label={translateContent('배터리 최고/평균 온도', language)} value={`${maxTemp.toFixed(1)} / ${avgTemp.toFixed(1)}°C`} note={translateContent(thermalStatus, language)} danger={maxTemp >= 50} />
+                    <ThermalReadout icon={<Thermometer size={14} />} label={translateContent('셀 온도 편차', language)} value={`${tempDelta.toFixed(1)}°C`} note={translateContent('센서별 온도 분포 확인', language)} danger={tempDelta > 8} />
+                    <ThermalReadout icon={<Fan size={14} />} label={translateContent('냉각 펌프/팬 명령', language)} value={`${pumpCommand.toFixed(0)} / ${fanCommand.toFixed(0)}%`} note={translateContent(coolantStatus, language)} danger={localFault === 'cooling_failure'} />
+                    <ThermalReadout icon={<Droplets size={14} />} label={translateContent('냉각수 회로 상태', language)} value={translateContent(coolantStatus, language)} note={translateContent('펌프, 밸브, 라디에이터, 공기 혼입 점검', language)} danger={localFault === 'cooling_failure'} />
+                    <ThermalReadout icon={<BatteryCharging size={14} />} label={translateContent('BMS 허용 충전전류', language)} value={`${chargeLimit.toFixed(0)} A`} note={translateContent('온도와 SOC에 따라 충전속도 제한', language)} danger={chargeLimit <= 24} />
+                    <ThermalReadout icon={<AlertTriangle size={14} />} label={translateContent('보호로직 판단', language)} value={translateContent(thermalStatus, language)} note={translateContent('과온 시 충전/출력 제한 우선', language)} danger={maxTemp >= 50 || tempDelta > 8} />
+                 </div>
              </div>
              <div className="relative min-h-[190px] overflow-hidden rounded border border-slate-700 bg-slate-950">
                 <div className="absolute inset-0 blueprint-floor" style={roadDashStyle} />
@@ -178,4 +210,29 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     );
   }
   return null;
+}
+
+function ThermalReadout({
+  icon,
+  label,
+  value,
+  note,
+  danger
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  note: string;
+  danger?: boolean;
+}) {
+  return (
+    <div className={`rounded border p-2 shadow-sm ${danger ? 'border-red-300 bg-red-50' : 'border-slate-300 bg-white'}`}>
+      <div className={`mb-1 flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest ${danger ? 'text-red-700' : 'text-slate-700'}`}>
+        {icon}
+        {label}
+      </div>
+      <div className={`font-mono text-sm font-black ${danger ? 'text-red-900' : 'text-slate-950'}`}>{value}</div>
+      <div className={`mt-1 text-[10px] font-semibold ${danger ? 'text-red-700' : 'text-slate-600'}`}>{note}</div>
+    </div>
+  );
 }
